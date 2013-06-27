@@ -1,11 +1,8 @@
 /**
  * Block.java   single Tetris block description
- *
- * @author      Alex Pavloshchuk
- * @version     0.2a Septemper 28, 2002
  */
 
-package org.alexp.tetris;
+package org.example.tetris;
 
 import java.util.*;
 
