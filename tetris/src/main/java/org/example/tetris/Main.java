@@ -1,78 +1,96 @@
 /**
  * Main             main screen for Tetris game
- *                  (based on Sokoban example code)
- *
- * @author          Alex Pavloshchuk
- * @version 0.3a    October 2, 2002.
  */
 
-package org.alexp.tetris;
+package org.example.tetris;
 
-import javax.microedition.midlet.*;
-import javax.microedition.lcdui.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+
+import org.example.gui.swing.Activity;
+import org.example.gui.swing.Bundle;
+import org.example.gui.swing.Canvas;
+import org.example.gui.swing.Menu;
+import org.example.gui.swing.MenuItem;
 
 /**
  * Main class supports 
  */
-public class Main extends MIDlet implements CommandListener {
-    private Display         m_display;
+@SuppressWarnings("serial")
+public class Main extends Activity implements KeyListener {
+    private static final int ID_NEW_GAME = Menu.FIRST + 2;
+	private static final int ID_EXIT = Menu.FIRST + 3;
+	
     private CanvasMain      m_canvas;
     private Model           m_model;
     private ScoresCounter   m_counter;
     Ticker                  m_ticker;
     
-    // Commands list:
-    private Command     m_cmdExit   = new Command( "Exit", Command.EXIT, 60 );
-    private Command     m_cmdNew    = new Command( "New Game", Command.SCREEN, 20 );
-/*    
-    private Command     m_cmdPause  = new Command( "Pause", Command.SCREEN, 21 );
-    private Command     m_cmdBest   = new Command( "Best Results", Command.SCREEN, 22 );
-    private Command     m_cmdHelp   = new Command( "Help", Command.SCREEN, 23 );
-*/    
-    
-    // Constructor:
-    public Main() {
-        m_display = Display.getDisplay( this );
-        
+    @Override
+    public void onCreate( Bundle storedState ) {
+    	super.onCreate(storedState);
+    	
         m_counter = new ScoresCounter();
         m_model = new Model( m_counter );      
-        m_canvas = new CanvasMain( this );        
+        m_canvas = new CanvasMain( this );
+        
+        // TODO: swing related...
+        setLayout( new BorderLayout());
+        add( m_canvas, BorderLayout.CENTER );
     }
     
-    // Standard MIDlet abstract methods implementation:
-    public void startApp() {
-                        
-        m_canvas.addCommand( m_cmdNew );
-/*        
-        m_canvas.addCommand( m_cmdPause );
-        m_canvas.addCommand( m_cmdBest );
-        m_canvas.addCommand( m_cmdHelp );
-*/        
-        m_canvas.addCommand( m_cmdExit );
-        m_canvas.setCommandListener( this );
-        m_display.setCurrent( m_canvas );        
-    }
-    public void pauseApp() {
-    }
-    public void destroyApp( boolean bUnconditional ) {
+    @Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+    	
+    	// TODO: eliminate listeners on Android
+    	
+    	menu.add( 0, ID_NEW_GAME, "New Game", new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				startNewGame();
+			}
+		} );
+    	menu.add( 1, ID_EXIT, "Exit", new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				finish();
+			}
+		} );
+		return super.onCreateOptionsMenu(menu);
+	} 
+    
+    @Override
+	public boolean onOptionsItemSelected( MenuItem item ) {
+    	switch( item.getId() ) {
+    	case ID_NEW_GAME:
+    		startNewGame();
+    		return true;
+    	case ID_EXIT:
+    		finish();
+    		return true;
+    	}
+		return super.onOptionsItemSelected(item);
+	}    
+    
+    private final void startNewGame() {
+        if( m_model.getGameStatus() != Model.GAME_ACTIVE ) {
+            m_model.gameStart();
+            m_ticker = new Ticker( this );
+            m_ticker.start();
+        }    	
     }
     
-    // CommandListener implementation:
-    public void commandAction( Command cmd, Displayable disp ) {
-                
-        if( cmd == m_cmdExit ) {
-            destroyApp( false );
-            notifyDestroyed();
-        } else if ( cmd == m_cmdNew ) {
-            if( m_model.getGameStatus() != Model.GAME_ACTIVE ) {
-                m_model.gameStart();
-                m_ticker = new Ticker( this );
-                m_ticker.start();
-            } 
-        } else {            
-        }
+    private final void finish() {
+    	// TODO: skip this method in the real Android application
     }
-    
+        
     public Model getModel() {
         return m_model;
     }
@@ -82,8 +100,34 @@ public class Main extends MIDlet implements CommandListener {
     public Canvas getCanvas() {
         return m_canvas;
     }
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		int code = e.getKeyCode();
+	     switch( code ) {
+         case KeyEvent.VK_UP:
+             m_model.generateNewField( Model.MOVE_ROTATE ); 
+             repaint(); return;
+         case KeyEvent.VK_RIGHT:
+             m_model.generateNewField( Model.MOVE_RIGHT ); 
+             repaint(); return;
+         case KeyEvent.VK_LEFT:
+             m_model.generateNewField( Model.MOVE_LEFT ); 
+             repaint(); return;
+     }		
+		
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+	}
 }
 
+@SuppressWarnings("serial")
 class CanvasMain extends Canvas {
     
     // RIM specified data:
@@ -113,55 +157,20 @@ class CanvasMain extends Canvas {
         m_scrScores = new ScreenScores( app.getScoresCounter(),
             s_scoresX, s_scoresY, s_scoresW, s_scoresH, s_colorFG, s_colorBG );
     }
-    
-    protected void keyPressed( int nKeyCode ) {
-        Model model = m_app.getModel();
-        
-        if( model.getGameStatus() != Model.GAME_ACTIVE ) {
-            super.keyPressed( nKeyCode );
-            return;
-        }
-        
-        synchronized( m_scrField ) {
-            int nAction = this.getGameAction( nKeyCode );
-            switch( nAction ) {
-                case Canvas.FIRE:
-                    model.generateNewField( Model.MOVE_ROTATE ); 
-                    repaint(); return;
-                case Canvas.DOWN:
-                    model.generateNewField( Model.MOVE_RIGHT ); 
-                    repaint(); return;
-                case Canvas.UP:
-                    model.generateNewField( Model.MOVE_LEFT ); 
-                    repaint(); return;
-            }
-        }
-        super.keyPressed( nKeyCode );
-    }
-    protected void keyRepeated( int nKeyCode ) {
-        synchronized( m_scrField ) {
-            int nAction = this.getGameAction( nKeyCode );
-            switch( nAction ) {
-                case Canvas.UP:
-                case Canvas.DOWN:
-                    keyPressed( nKeyCode );
-            }
-        }
-    }
-       
+           
+    @Override
     public void paint( Graphics gr ) {
-        int nClipX = gr.getClipX();
-        int nClipY = gr.getClipY();
-        int nClipW = gr.getClipWidth();
-        int nClipH = gr.getClipHeight();
         
         // show the background:
-        gr.setColor( s_colorBG );
-        gr.fillRect( nClipX, nClipY, nClipW, nClipH );   
+        gr.setColor( new Color( s_colorBG ) );
+        
+        Dimension size = getSize();
+        gr.fillRect( 0, 0, size.width, size.width );   
         
         // show the field screen:
         m_scrField.paint( gr );
         // show the scores screen:
         m_scrScores.paint( gr );
-    } 
+    }
 }
+
