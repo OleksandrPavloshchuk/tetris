@@ -8,7 +8,7 @@ import org.example.gui.swing.Canvas;
 
 public class Ticker extends Thread {
     private Main m_app = null;
-    private int m_nDelay = 200;
+    private int m_nDelay = 400;
     
     Ticker(Main app ) {
         m_app = app;
