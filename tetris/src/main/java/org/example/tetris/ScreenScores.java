@@ -1,13 +1,11 @@
 /**
  * ScreenScores.java   screen for scores 
- *
- * @author      Alex Pavloshchuk
- * @version     0.3a October 2, 2002
  */
 
-package org.alexp.tetris;
+package org.example.tetris;
 
-import javax.microedition.lcdui.Graphics;
+import java.awt.Color;
+import java.awt.Graphics;
 
 public class ScreenScores extends ScreenBase {
     
@@ -20,12 +18,13 @@ public class ScreenScores extends ScreenBase {
         m_counter = counter;
     }
   
+    @Override
     public void paint( Graphics g ) {
-        g.setColor( m_colorFG );
+        g.setColor( new Color( m_colorFG ) );
         
         String str = "Lines: " + m_counter.getLines();
-        g.drawString( str, m_nLeft, m_nTop, Graphics.TOP|Graphics.LEFT );
+        g.drawString( str, m_nLeft, m_nTop );
         str = "Scores: " + m_counter.getScores();
-        g.drawString( str, m_nLeft, m_nTop+10, Graphics.TOP|Graphics.LEFT );        
+        g.drawString( str, m_nLeft, m_nTop+10 );        
     }
 }
