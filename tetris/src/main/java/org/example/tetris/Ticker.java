@@ -1,14 +1,10 @@
 /**
  * Ticker.java  refreshes the game screen with the specified speed
- *
- * @author      Alex Pavloshchuk
- * @version     0.2a September 10, 2002
  */
 
-package org.alexp.tetris;
+package org.example.tetris;
 
-import java.util.*;
-import javax.microedition.lcdui.*;
+import org.example.gui.swing.Canvas;
 
 public class Ticker extends Thread {
     private Main m_app = null;
@@ -18,6 +14,7 @@ public class Ticker extends Thread {
         m_app = app;
     }
     
+    @Override
     public void run() {
         try {
             Model model = m_app.getModel();
