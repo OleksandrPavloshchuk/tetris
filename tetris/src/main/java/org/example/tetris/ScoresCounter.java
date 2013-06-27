@@ -1,11 +1,8 @@
 /**
  * ScoresCounter    counting the scores eraned in Tetris
- *
- * @author          Alex Pavloshchuk
- * @version         0.3a October 2, 2002
  */
 
-package org.alexp.tetris;
+package org.example.tetris;
 
 public class ScoresCounter
 {
