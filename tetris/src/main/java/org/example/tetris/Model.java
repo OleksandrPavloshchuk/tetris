@@ -1,16 +1,7 @@
 /**
  * Model.java   algorithmes of Tetris separated from visual presentation
- *
- * @author      Alex Pavloshchuk
- * @version     0.2a September 28, 2002
  */
-package org.alexp.tetris;
-
-import javax.microedition.midlet.*;
-import javax.microedition.lcdui.*;
-import java.lang.*;
-
-import java.io.*;
+package org.example.tetris;
 
 public class Model {
 
