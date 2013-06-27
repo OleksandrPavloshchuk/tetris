@@ -1,13 +1,11 @@
 /**
  * ScreenBase   base screen for ScreenScores and ScreenField
- *
- * @author      Alex Pavloshchuk
- * @version     0.3a October 2, 2002
  */
 
-package org.alexp.tetris;
+package org.example.tetris;
 
-import javax.microedition.lcdui.Graphics;
+// TODO: replace this "swing" graphics by Android graphics
+import java.awt.Graphics;
 
 public abstract class ScreenBase
 {
