@@ -1,14 +1,11 @@
 /**
  * ScreenField  visual presentation of the Tetris model
- *
- * @author      Alex Pavloshchuk
- * @version     0.3a October 2, 2002
  */
 
-package org.alexp.tetris;
+package org.example.tetris;
 
-// import javax.microedition.midlet.*;
-import javax.microedition.lcdui.Graphics;
+import java.awt.Color;
+import java.awt.Graphics;
 
 public class ScreenField  extends ScreenBase {
 
@@ -28,29 +25,30 @@ public class ScreenField  extends ScreenBase {
   {
     super( nLeft+MARGIN, nTop+MARGIN, nWidth, nHeight, colorFG, colorBG );
     m_model = model;
-    m_nCellW = ( nWidth -  (MARGIN<<1) ) / m_model.NUM_COLS;
-    m_nCellH = ( nHeight - (MARGIN<<1) ) / m_model.NUM_ROWS;
+    m_nCellW = ( nWidth -  (MARGIN<<1) ) / Model.NUM_COLS;
+    m_nCellH = ( nHeight - (MARGIN<<1) ) / Model.NUM_ROWS;
   }
      
 /**
  * Paint the screen in apropriate graphics
  * @param a_graphics the graphics
  */
+  @Override
   public void paint( Graphics gr ) {
       
     // draw the frame:
     int x = m_nLeft - MARGIN;
     int y = m_nTop - MARGIN;
-    int width = (MARGIN << 1) + m_nCellW * m_model.NUM_COLS;
-    int height = (MARGIN << 1) + m_nCellH * m_model.NUM_ROWS;
-    gr.setColor( m_colorBG );
+    int width = (MARGIN << 1) + m_nCellW * Model.NUM_COLS;
+    int height = (MARGIN << 1) + m_nCellH * Model.NUM_ROWS;
+    gr.setColor( new Color( m_colorBG ) );
     gr.fillRect( x, y, width, height );
-    gr.setColor( m_colorFG );
+    gr.setColor( new Color( m_colorFG ) );
     gr.drawRect( x, y, width, height );    
 
     // draw all the cells:
-    for( int i=0; i<m_model.NUM_ROWS; i++ ) {
-        for( int j=0; j<m_model.NUM_COLS; j++ ) {
+    for( int i=0; i<Model.NUM_ROWS; i++ ) {
+        for( int j=0; j<Model.NUM_COLS; j++ ) {
             drawCell( gr, i, j ); 
         }
     }
@@ -74,23 +72,16 @@ public class ScreenField  extends ScreenBase {
     switch ( nStatus ) {
 
       case Block.CELL_EMPTY:
-
-/* draw lines: 
-        a_graphics.setColor( _colorFG );
-        a_graphics.drawRect( x, y, _cellWidth , _cellHeight );
-        a_graphics.setColor( _colorBG );
-        a_graphics.fillRect( x + 1, y + 1, _cellWidth - 1, _cellHeight - 1 );
-*/
         
-        gr.setColor( m_colorBG );
+        gr.setColor( new Color( m_colorBG ) );
         gr.fillRect( x, y, m_nCellW, m_nCellH );
         break;
 
       case Block.CELL_DYNAMIC:
       case Block.CELL_STATIC:
-        gr.setColor( m_colorBG );
+        gr.setColor( new Color( m_colorBG ) );
         gr.drawRect( x, y, m_nCellW , m_nCellH );
-        gr.setColor( m_colorFG );
+        gr.setColor( new Color( m_colorFG ) );
         gr.fillRect( x+1, y+1, m_nCellW-1, m_nCellH-1 );
         break;
     }
