@@ -11,7 +11,7 @@ import org.example.gui.swing.Menu;
 
 @SuppressWarnings("serial")
 public class SwingStarter extends JFrame {
-    public static void main(String[] args) {
+	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
 
 			@Override
@@ -33,6 +33,8 @@ public class SwingStarter extends JFrame {
 		final JPanel content = new JPanel();
 		content.setLayout( new BorderLayout() );
 		content.add(activity, BorderLayout.CENTER);
+		
+		addKeyListener(activity);
 		
 		Menu menu = new Menu();
 		activity.onCreateOptionsMenu( menu );
