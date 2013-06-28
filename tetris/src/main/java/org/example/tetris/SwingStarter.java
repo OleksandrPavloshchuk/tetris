@@ -48,7 +48,7 @@ public class SwingStarter extends JFrame {
 		
 		setContentPane(content);
 		activity.onCreate(null);
-		setSize(SIZE);
+		setSize( SIZE.width, SIZE.height + 40);
 		setVisible(true);
 	}
 }

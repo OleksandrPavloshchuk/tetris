@@ -138,18 +138,15 @@ public class Main extends Activity {
 	public void keyReleased(KeyEvent e) {
 	}
 
-	class CanvasMain extends Canvas {
-
-		private static final int COLOR_BG = 0xFFFFFF; // - background color
-		private static final int COLOR_FG = 0x000000; // - foreground color
+	private class CanvasMain extends Canvas {
 
 		private final ScreenField screenField;
 		private final ScreenScores screenScores;
 
 		private CanvasMain() {
 			super();
-			screenField = new ScreenField(model, COLOR_FG, COLOR_BG);
-			screenScores = new ScreenScores(counter, COLOR_FG, COLOR_BG);
+			screenField = new ScreenField(model);
+			screenScores = new ScreenScores(counter);
 		}
 
 		@Override
@@ -163,7 +160,7 @@ public class Main extends Activity {
 		public void paint(Graphics gr) {
 
 			// show the background:
-			gr.setColor(new Color(COLOR_BG));
+			gr.setColor(Color.white);
 
 			Dimension size = getSize();
 			gr.fillRect(0, 0, size.width, size.width);

@@ -3,6 +3,8 @@
  */
 package org.example.tetris;
 
+import java.awt.Color;
+
 public class Model {
 	
 	public enum Move {
@@ -196,8 +198,10 @@ public class Model {
 		// set all the dynamic data as static:
 		for (int i = 0; i < field.length; i++) {
 			for (int j = 0; j < field[i].length; j++) {
-				if (getCellStatus(i, j) == Block.CELL_DYNAMIC) {
-					setCellStatus(i, j, Block.CELL_STATIC);
+				byte status = getCellStatus(i, j);
+				if ( status == Block.CELL_DYNAMIC) {
+					status = activeBlock.getStaticValue();
+					setCellStatus(i, j, status );
 				}
 			}
 		}
@@ -205,7 +209,9 @@ public class Model {
 		for (int i = 0; i < field.length; i++) {
 			boolean bFullRow = true;
 			for (int j = 0; j < field[i].length; j++) {
-				bFullRow &= (getCellStatus(i, j) == Block.CELL_STATIC);
+				byte status = getCellStatus(i, j);
+				boolean isEmpty = Block.CELL_EMPTY==status;
+				bFullRow &= !isEmpty;
 			}
 			if (bFullRow) {
 				shiftRows(i);
@@ -239,5 +245,9 @@ public class Model {
 		for (int j = 0; j < field[0].length; j++) {
 			setCellStatus(0, j, Block.CELL_EMPTY);
 		}
+	}
+
+	public Color getActiveBlockColor() {
+		return activeBlock.getColor();
 	}
 }

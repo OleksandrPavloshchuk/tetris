@@ -21,40 +21,24 @@ public abstract class ScreenBase {
 
 	protected abstract double getHeight();
 
-	protected int m_colorBG;
-	protected int m_colorFG;
-
-	private Dimension canvasSize = new Dimension(0,0);
-
-	protected ScreenBase(int colorFG, int colorBG) {
-		m_colorFG = colorFG;
-		m_colorBG = colorBG;
-	}
+	private Dimension canvasSize = new Dimension(0, 0);
 
 	protected final Point getLocation() {
 		double x = getLeft() * canvasSize.width;
 		double y = getTop() * canvasSize.height;
-		
-		Point result = new Point( (int) x, (int) y);
-		
-		// TODO: remove trace
-		System.out.println( "(" + this + ") location = " + result );		
-		
+
+		Point result = new Point((int) x, (int) y);
 		return result;
 	}
 
 	protected final Dimension getSize() {
 		double width = getWidth() * canvasSize.width;
 		double height = getHeight() * canvasSize.height;
-		Dimension result = new Dimension( (int) width, (int) height);
-		
-		// TODO: remove trace
-		System.out.println( "(" + this + ") size = " + result );
-		
+		Dimension result = new Dimension((int) width, (int) height);
 		return result;
 	}
-	
-	public void setCanvasSize( Dimension canvasSize ) {
+
+	public void setCanvasSize(Dimension canvasSize) {
 		this.canvasSize = canvasSize;
 	}
 
