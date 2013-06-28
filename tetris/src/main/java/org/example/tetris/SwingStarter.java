@@ -1,6 +1,7 @@
 package org.example.tetris;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -11,6 +12,9 @@ import org.example.gui.swing.Menu;
 
 @SuppressWarnings("serial")
 public class SwingStarter extends JFrame {
+	
+	private static final Dimension SIZE = new Dimension( 400, 600 );
+	
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
 
@@ -30,6 +34,8 @@ public class SwingStarter extends JFrame {
 		super( title );
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
+		activity.setCanvasSize(SIZE);		
+		
 		final JPanel content = new JPanel();
 		content.setLayout( new BorderLayout() );
 		content.add(activity, BorderLayout.CENTER);
@@ -42,7 +48,7 @@ public class SwingStarter extends JFrame {
 		
 		setContentPane(content);
 		activity.onCreate(null);
-		setSize(Activity.CONTAINER_SIZE);
+		setSize( SIZE.width, SIZE.height + 40);
 		setVisible(true);
 	}
 }
