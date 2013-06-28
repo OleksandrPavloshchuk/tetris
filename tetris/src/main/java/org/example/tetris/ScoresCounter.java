@@ -6,23 +6,23 @@ package org.example.tetris;
 
 public class ScoresCounter
 {
-    private int m_nScores = 0;
-    private int m_nLines = 0;
-    private int m_nScoreDelta = 4;
+    private int scores = 0;
+    private int lines = 0;
+    private int scoreDelta = 4;
     
     public void reset() {
-        m_nScores = 0; m_nLines = 0;
+        scores = 0; lines = 0;
     }
     public int getScores() { 
-        return m_nScores; 
+        return scores; 
     }
     public int getLines() { 
-        return m_nLines; 
+        return lines; 
     }    
     public void addScores() {
-        m_nScores += m_nScoreDelta;
+        scores += scoreDelta;
     }
     public void addLine() {
-        m_nLines++;
+        lines++;
     }
 }
