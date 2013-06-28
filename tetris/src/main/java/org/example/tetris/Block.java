@@ -4,9 +4,7 @@
 
 package org.example.tetris;
 
-import java.util.*;
-
-import java.io.*;
+import java.util.Random;
 
 public class Block {
 
@@ -55,17 +53,6 @@ public class Block {
   private Block( int nShape ) {
       m_nShape = nShape;
   }
-  
-  // trace [[
-  synchronized void print( PrintStream out ) {
-    out.println( getClass().getName() + " [[");
-    out.println( "shape = " + m_nShape );
-    out.println( "frame = " + m_nFrame );
-    out.println( "top Y = " + m_nTopY );
-    out.println( "left X = " + m_nLeftX );    
-    out.println( "]] " + getClass().getName());
-  }
-  // ]] trace
   
   // Shapes data:
   private static final byte[][][][] SHAPES = {
