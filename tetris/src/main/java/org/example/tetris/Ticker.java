@@ -4,8 +4,6 @@
 
 package org.example.tetris;
 
-import org.example.gui.swing.Canvas;
-
 public class Ticker extends Thread {
 	private Main m_app = null;
 	private int m_nDelay = 400;
@@ -18,7 +16,6 @@ public class Ticker extends Thread {
 	public void run() {
 		try {
 			Model model = m_app.getModel();
-			Canvas canvas = m_app.getCanvas();
 			while (!model.isGameOver()) {
 				synchronized (model) {
 					if (!model.isGameActive()) {
@@ -27,7 +24,7 @@ public class Ticker extends Thread {
 
 					sleep(m_nDelay);
 					model.generateNewField(Model.Move.DOWN);
-					canvas.repaint();
+					m_app.repaint();
 				}
 			}
 		} catch (InterruptedException ex) {

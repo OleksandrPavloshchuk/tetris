@@ -34,7 +34,7 @@ public class Block {
 	// current block state:
 	private int shape = 0;
 	private int frame = 0;
-	private Point topLeft = new Point(0, Model.NUM_COLS >> 1);
+	private Point topLeft = new Point(Model.NUM_COLS >> 1, 0);
 	private BlockColor color;
 
 	public int getFrame() {

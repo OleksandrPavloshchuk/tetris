@@ -1,19 +1,12 @@
 package org.example.tetris;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import org.example.gui.swing.Activity;
-import org.example.gui.swing.Menu;
 
 @SuppressWarnings("serial")
 public class SwingStarter extends JFrame {
-	
-	private static final Dimension SIZE = new Dimension( 400, 600 );
 	
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
@@ -32,23 +25,11 @@ public class SwingStarter extends JFrame {
 	
 	private SwingStarter( String title, Activity activity ) {
 		super( title );
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);		
 		
-		activity.setCanvasSize(SIZE);		
-		
-		final JPanel content = new JPanel();
-		content.setLayout( new BorderLayout() );
-		content.add(activity, BorderLayout.CENTER);
-		
-		addKeyListener(activity);
-		
-		Menu menu = new Menu();
-		activity.onCreateOptionsMenu( menu );
-		content.add(menu, BorderLayout.NORTH);
-		
-		setContentPane(content);
+		setContentPane( activity );
 		activity.onCreate(null);
-		setSize( SIZE.width, SIZE.height + 40);
+		setSize( 400, 600 );
 		setVisible(true);
 	}
 }

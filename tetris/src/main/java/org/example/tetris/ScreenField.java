@@ -9,42 +9,18 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 
-public class ScreenField extends ScreenBase {
+import javax.swing.JPanel;
+
+@SuppressWarnings("serial")
+public class ScreenField extends JPanel {
 
 	static private final int MARGIN = 2;
 	private static final Color COLOR_BACKGROUND = new Color(0xeeffcc);
 
 	private final Model model;
-	private Dimension cellSize = null;
 
 	public ScreenField(Model model) {
 		this.model = model;
-	}
-
-	@Override
-	public void setCanvasSize(Dimension canvasSize) {
-		super.setCanvasSize(canvasSize);
-		this.cellSize = calculateCellSize();
-	}
-
-	@Override
-	protected double getTop() {
-		return 0.125;
-	}
-
-	@Override
-	protected double getLeft() {
-		return 0.125;
-	}
-
-	@Override
-	protected double getWidth() {
-		return 0.75;
-	}
-
-	@Override
-	protected double getHeight() {
-		return 0.75;
 	}
 
 	@Override
@@ -71,7 +47,7 @@ public class ScreenField extends ScreenBase {
 		gr.drawRect(x, y, width, height);
 	}
 
-	private Dimension calculateCellSize() {
+	private Dimension getCellSize() {
 		Dimension size = getSize();
 		int cellWidth = (size.width - (MARGIN << 1)) / Model.NUM_COLS;
 		int cellHeight = (size.height - (MARGIN << 1)) / Model.NUM_ROWS;
@@ -83,6 +59,7 @@ public class ScreenField extends ScreenBase {
 		byte nStatus = model.getCellStatus(row, col);
 
 		Point p = getLocation();
+		Dimension cellSize = getCellSize();
 
 		int x = col * cellSize.width + p.x;
 		int y = row * cellSize.height + p.y;
@@ -104,6 +81,7 @@ public class ScreenField extends ScreenBase {
 
 	private void drawCell(Graphics gr, int x, int y, Color colorFG) {
 		gr.setColor(COLOR_BACKGROUND);
+		Dimension cellSize = getCellSize();		
 		gr.drawRect(x, y, cellSize.width, cellSize.height);
 		gr.setColor(colorFG);
 		gr.fillRect(x + 1, y + 1, cellSize.width - 1, cellSize.height - 1);

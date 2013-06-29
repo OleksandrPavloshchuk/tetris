@@ -5,81 +5,119 @@
 package org.example.tetris;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
+
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import org.example.gui.swing.Activity;
 import org.example.gui.swing.Bundle;
 import org.example.gui.swing.Canvas;
-import org.example.gui.swing.Menu;
-import org.example.gui.swing.MenuItem;
 
 @SuppressWarnings("serial")
 public class Main extends Activity {
-	private static final int ID_NEW_GAME = Menu.FIRST + 2;
-	private static final int ID_EXIT = Menu.FIRST + 3;
 
-	private final CanvasMain canvas;
-	private final Model model;
-	private final ScoresCounter counter;
 	private Ticker ticker;
-	
+
+	private JLabel scoresLabel = new JLabel();
+	private JButton handleButton = new JButton("New Game");
+	private final ScoresCounter counter = new ScoresCounter( scoresLabel );
+	private final Model model = new Model(counter);
+	private ScreenField screenField = new ScreenField( model );
+
 	public Main() {
-		counter = new ScoresCounter();
-		model = new Model(counter);
-		canvas = new CanvasMain();		
+		setLayout(new BorderLayout());
+		add(createHeader(), BorderLayout.NORTH );
+		add(createCanvas(), BorderLayout.CENTER );
 	}
 
-	@Override
-	public void setCanvasSize(Dimension size) {
-		canvas.setSize(size);
+	private JPanel createHeader() {
+		JPanel result = new JPanel();
+		result.setLayout(new BorderLayout());
+		result.add(scoresLabel, BorderLayout.CENTER );
+		handleButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				if (model.isGameActive()) {
+					// TODO: pause game
+					handleButton.setText("Resume");
+				} else {
+					handleButton.setText("Pause");
+					startNewGame();
+				}
+			}
+		});
+		result.add(handleButton, BorderLayout.WEST );
+		
+		JButton exitButton = new JButton( "Exit" );
+		exitButton.addActionListener( new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				System.exit(0);
+			}
+		});
+		result.add(exitButton, BorderLayout.EAST );
+		
+
+		return result;
+	}
+	
+	private JPanel createCanvas() {
+		JPanel result = new JPanel();
+		
+		result.setLayout( new BorderLayout() );
+		result.add( screenField, BorderLayout.CENTER );
+		
+		JButton rotateButton = new JButton( "Rotate" );
+		result.add( rotateButton, BorderLayout.NORTH );
+		rotateButton.addActionListener( new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				model.generateNewField(Model.Move.ROTATE);
+				repaint();				}
+		});
+		
+		JButton leftButton = new JButton( "Left" );
+		result.add( leftButton, BorderLayout.WEST );
+		leftButton.addActionListener( new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				model.generateNewField(Model.Move.LEFT);
+				repaint();				}
+		});
+		
+		JButton rightButton = new JButton( "Right" );
+		result.add( rightButton, BorderLayout.EAST );
+		rightButton.addActionListener( new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				model.generateNewField(Model.Move.RIGHT);
+				repaint();				}
+		});
+		
+		JButton downButton = new JButton( "Down" );
+		result.add( downButton, BorderLayout.SOUTH );
+		downButton.addActionListener( new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				model.generateNewField(Model.Move.DOWN);
+				repaint();				}
+		});		
+		
+		return result;
 	}
 
 	@Override
 	public void onCreate(Bundle storedState) {
 		super.onCreate(storedState);
-
-		// TODO: swing related...
-		setLayout(new BorderLayout());
-		add(canvas, BorderLayout.CENTER);
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-
-		// TODO: eliminate listeners on Android
-
-		menu.add(0, ID_NEW_GAME, "New Game", new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				startNewGame();
-			}
-		});
-		menu.add(1, ID_EXIT, "Exit", new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				finish();
-			}
-		});
-		return super.onCreateOptionsMenu(menu);
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getId()) {
-		case ID_NEW_GAME:
-			startNewGame();
-			return true;
-		case ID_EXIT:
-			finish();
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
 	}
 
 	private final void startNewGame() {
@@ -103,68 +141,4 @@ public class Main extends Activity {
 		return counter;
 	}
 
-	public Canvas getCanvas() {
-		return canvas;
-	}
-
-	@Override
-	public void keyPressed(KeyEvent e) {
-		int code = e.getKeyCode();
-
-		switch (code) {
-		case KeyEvent.VK_UP:
-			model.generateNewField(Model.Move.ROTATE);
-			repaint();
-			return;
-		case KeyEvent.VK_RIGHT:
-			model.generateNewField(Model.Move.RIGHT);
-			repaint();
-			return;
-		case KeyEvent.VK_LEFT:
-			model.generateNewField(Model.Move.LEFT);
-			repaint();
-			return;
-		}
-
-	}
-
-	@Override
-	public void keyTyped(KeyEvent e) {
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-	}
-
-	private class CanvasMain extends Canvas {
-
-		private final ScreenField screenField;
-		private final ScreenScores screenScores;
-
-		private CanvasMain() {
-			super();
-			screenField = new ScreenField(model);
-			screenScores = new ScreenScores(counter);
-		}
-
-		@Override
-		public void setSize(Dimension size) {
-			super.setSize(size);
-			screenField.setCanvasSize(size);
-			screenScores.setCanvasSize(size);
-		}
-
-		@Override
-		public void paint(Graphics gr) {
-			paintBackground(gr);
-			screenField.paint(gr);
-			screenScores.paint(gr);
-		}
-
-		private void paintBackground(Graphics gr) {
-			gr.setColor(Color.white);
-			Dimension size = getSize();
-			gr.fillRect(0, 0, size.width, size.width);
-		}
-	}
 }
