@@ -18,17 +18,14 @@ import org.example.gui.swing.Canvas;
 import org.example.gui.swing.Menu;
 import org.example.gui.swing.MenuItem;
 
-/**
- * Main class supports
- */
 @SuppressWarnings("serial")
 public class Main extends Activity {
 	private static final int ID_NEW_GAME = Menu.FIRST + 2;
 	private static final int ID_EXIT = Menu.FIRST + 3;
 
-	private CanvasMain canvas;
-	private Model model;
-	private ScoresCounter counter;
+	private final CanvasMain canvas;
+	private final Model model;
+	private final ScoresCounter counter;
 	private Ticker ticker;
 	
 	public Main() {
@@ -88,6 +85,7 @@ public class Main extends Activity {
 	private final void startNewGame() {
 		if (!model.isGameActive()) {
 			model.gameStart();
+			// TODO: use android related handler and messages
 			ticker = new Ticker(this);
 			ticker.start();
 		}
@@ -158,17 +156,15 @@ public class Main extends Activity {
 
 		@Override
 		public void paint(Graphics gr) {
+			paintBackground(gr);
+			screenField.paint(gr);
+			screenScores.paint(gr);
+		}
 
-			// show the background:
+		private void paintBackground(Graphics gr) {
 			gr.setColor(Color.white);
-
 			Dimension size = getSize();
 			gr.fillRect(0, 0, size.width, size.width);
-
-			// show the field screen:
-			screenField.paint(gr);
-			// show the scores screen:
-			screenScores.paint(gr);
 		}
 	}
 }
