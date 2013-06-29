@@ -7,7 +7,6 @@ package org.example.tetris;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Point;
 
 import javax.swing.JPanel;
 
@@ -26,25 +25,20 @@ public class ScreenField extends JPanel {
 	@Override
 	public void paint(Graphics gr) {
 		drawFrame(gr);
+		
 		// draw all the cells:
 		for (int i = 0; i < Model.NUM_ROWS; i++) {
 			for (int j = 0; j < Model.NUM_COLS; j++) {
 				drawCell(gr, i, j);
 			}
 		}
+		
 	}
 
 	private void drawFrame(Graphics gr) {
-		Point p = getLocation();
-		int x = p.x - MARGIN;
-		int y = p.y - MARGIN;
-		final Dimension size = getSize();
-		final int width = 2 * MARGIN + size.width;
-		final int height = 2 * MARGIN + size.height;
+		Dimension size = getSize();
 		gr.setColor(COLOR_BACKGROUND);
-		gr.fillRect(x, y, width, height);
-		gr.setColor(new Color(0x336633));
-		gr.drawRect(x, y, width, height);
+		gr.fillRect(0, 0, size.width, size.height);
 	}
 
 	private Dimension getCellSize() {
@@ -58,11 +52,10 @@ public class ScreenField extends JPanel {
 
 		byte nStatus = model.getCellStatus(row, col);
 
-		Point p = getLocation();
 		Dimension cellSize = getCellSize();
 
-		int x = col * cellSize.width + p.x;
-		int y = row * cellSize.height + p.y;
+		int x = col * cellSize.width ;
+		int y = row * cellSize.height;
 
 		switch (nStatus) {
 
