@@ -12,7 +12,7 @@ public class Block {
 
 	public enum BlockColor {
 		RED(0x990000, (byte) 2), GREEN(0x009900, (byte) 3), BLUE(0x000099,
-				(byte) 4);
+				(byte) 4), YELLOW( 0xcccc33, (byte) 5 );
 		private final Color color;
 		private final byte value;
 
@@ -24,7 +24,7 @@ public class Block {
 
 	// cell status values (inner):
 	private static final byte _N = 0;
-	private static final byte _D = 2;
+	private static final byte _D = 1;
 	// cell status values (outer):
 	public static final byte CELL_EMPTY = _N;
 	public static final byte CELL_DYNAMIC = _D;

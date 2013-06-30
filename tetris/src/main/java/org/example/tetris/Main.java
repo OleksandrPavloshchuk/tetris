@@ -41,16 +41,14 @@ public class Main extends Activity {
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				if (model.isGameActive()) {
-					if( null!=ticker ) {
-						ticker.setPause(true);
-					}
+					model.setGamePaused();
 					handleButton.setText("Resume");
-				} else {
-					if( null!=ticker ) {
-						ticker.setPause(false);
-					}
+				} else if (model.isGamePaused()) {
+					model.setGameActive();
 					handleButton.setText("Pause");
-					startNewGame();
+				} else {
+					handleButton.setText("Pause");
+					startNewGame();					
 				}
 			}
 		});

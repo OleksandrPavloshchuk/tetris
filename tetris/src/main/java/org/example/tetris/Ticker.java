@@ -8,7 +8,6 @@ import javax.swing.SwingWorker;
 
 public class Ticker extends SwingWorker<Void, Model.Move> {
 
-	private boolean pause = false;
 	private Main action = null;
 	private int delay = 400;
 
@@ -24,10 +23,6 @@ public class Ticker extends SwingWorker<Void, Model.Move> {
 		return delay;
 	}
 	
-	public void setPause( boolean pause ) {
-		this.pause = pause;
-	}
-
 	@Override
 	protected Void doInBackground() throws Exception {
 
@@ -36,7 +31,7 @@ public class Ticker extends SwingWorker<Void, Model.Move> {
 			if( isCancelled() ) {
 				return null;
 			}
-			if( !pause ) {
+			if( model.isGameActive() ) {
 				Thread.sleep(delay);
 				action.doMove(Model.Move.DOWN);
 			}

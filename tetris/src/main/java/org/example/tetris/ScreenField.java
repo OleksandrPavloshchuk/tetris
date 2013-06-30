@@ -58,7 +58,7 @@ public class ScreenField extends JPanel {
 		int y = row * cellSize.height;
 		
 		if( Block.CELL_EMPTY!=nStatus ) {
-			Color color = Block.CELL_DYNAMIC!=nStatus ? model.getActiveBlockColor() :
+			Color color = Block.CELL_DYNAMIC==nStatus ? model.getActiveBlockColor() :
 				Block.getColorForStaticValue(nStatus);
 			drawCell(gr, x, y, color);
 		}

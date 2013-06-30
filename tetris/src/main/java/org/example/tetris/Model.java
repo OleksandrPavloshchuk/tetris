@@ -57,11 +57,6 @@ public class Model {
 		field[nRow][nCol] = nStatus;
 	}
 
-	// Game status:
-	public GameStatus getGameStatus() {
-		return gameStatus;
-	}
-
 	public void setGameStatus(GameStatus gameStatus) {
 		this.gameStatus = gameStatus;
 	}
@@ -71,9 +66,21 @@ public class Model {
 		if (isGameActive()) {
 			return;
 		}
-		setGameStatus(GameStatus.ACTIVE);
+		setGameActive();
 		activeBlock = Block.createBlock();
 	}
+
+	public void setGameActive() {
+		setGameStatus(GameStatus.ACTIVE);
+	}
+	
+	public void setGamePaused() {
+		setGameStatus(GameStatus.SUSPENDED);
+	}
+
+	public boolean isGamePaused() {
+		return GameStatus.SUSPENDED.equals(gameStatus);
+	}	
 
 	/**
 	 * Create and check the array of new data:
@@ -173,8 +180,9 @@ public class Model {
 				for (int j = 0; j < shape[i].length; j++) {
 					int y = newTopLeft.y + i;
 					int x = newTopLeft.x + j;
-					if (shape[i][j] + field[y][x] > Block.CELL_DYNAMIC)
+					if( Block.CELL_EMPTY!=shape[i][j] && Block.CELL_EMPTY!=field[y][x]) {
 						return false;
+					}
 				}
 			}
 
@@ -183,7 +191,9 @@ public class Model {
 				for (int j = 0; j < shape[i].length; j++) {
 					int y = newTopLeft.y + i;
 					int x = newTopLeft.x + j;
-					field[y][x] += shape[i][j];
+					if( Block.CELL_EMPTY!=shape[i][j]) {
+						field[y][x] = shape[i][j];
+					}
 				}
 			}
 			return true;
