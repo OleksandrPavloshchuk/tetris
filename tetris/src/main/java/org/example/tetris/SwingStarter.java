@@ -1,27 +1,25 @@
 package org.example.tetris;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.awt.AWTEvent;
+import java.awt.Toolkit;
+import java.awt.event.AWTEventListener;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import org.example.gui.swing.Activity;
-import org.example.gui.swing.Menu;
 
 @SuppressWarnings("serial")
 public class SwingStarter extends JFrame {
-	
-	private static final Dimension SIZE = new Dimension( 400, 600 );
-	
+
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
 
 			@Override
 			public void run() {
 				try {
-					new SwingStarter("tetris for swing", new Main() );
+					new SwingStarter("tetris for swing", new Main());
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -29,26 +27,32 @@ public class SwingStarter extends JFrame {
 
 		});
 	}
-	
-	private SwingStarter( String title, Activity activity ) {
-		super( title );
+
+	private SwingStarter(String title, Activity activity) {
+		super(title);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		
-		activity.setCanvasSize(SIZE);		
-		
-		final JPanel content = new JPanel();
-		content.setLayout( new BorderLayout() );
-		content.add(activity, BorderLayout.CENTER);
-		
+		setContentPane(activity);
 		addKeyListener(activity);
-		
-		Menu menu = new Menu();
-		activity.onCreateOptionsMenu( menu );
-		content.add(menu, BorderLayout.NORTH);
-		
-		setContentPane(content);
 		activity.onCreate(null);
-		setSize( SIZE.width, SIZE.height + 40);
+		setSize(400, 600);
+		bindKeyboardEventListner(activity);
 		setVisible(true);
+	}
+
+	private void bindKeyboardEventListner(final Activity activity) {
+		long eventMask = AWTEvent.KEY_EVENT_MASK;
+
+		Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
+			public void eventDispatched(AWTEvent event) {
+				if( !KeyEvent.class.isInstance(event) ) {
+					return;
+				}
+				KeyEvent keyEvent = KeyEvent.class.cast(event);		
+				if( KeyEvent.KEY_PRESSED!=keyEvent.getID() ) {
+					return;
+				}				
+				activity.keyPressed(keyEvent);
+			}
+		}, eventMask);
 	}
 }
