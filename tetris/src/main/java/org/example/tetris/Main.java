@@ -7,6 +7,7 @@ package org.example.tetris;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -48,7 +49,7 @@ public class Main extends Activity {
 					handleButton.setText("Pause");
 				} else {
 					handleButton.setText("Pause");
-					startNewGame();					
+					startNewGame();
 				}
 			}
 		});
@@ -59,7 +60,7 @@ public class Main extends Activity {
 
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				if( null!=ticker ) {
+				if (null != ticker) {
 					ticker.cancel(true);
 				}
 				finish();
@@ -73,62 +74,62 @@ public class Main extends Activity {
 
 	private JPanel createCanvas() {
 		JPanel result = new JPanel();
-		
-		result.setLayout( new BorderLayout() );
-		result.add( screenField, BorderLayout.CENTER );
-		
-		JButton rotateButton = new JButton( "Rotate" );
-		result.add( rotateButton, BorderLayout.NORTH );
-		rotateButton.addActionListener( new ActionListener() {
-			
+
+		result.setLayout(new BorderLayout());
+		result.add(screenField, BorderLayout.CENTER);
+
+		JButton rotateButton = new JButton("Rotate");
+		result.add(rotateButton, BorderLayout.NORTH);
+		rotateButton.addActionListener(new ActionListener() {
+
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				doMove(Model.Move.ROTATE);
 			}
 		});
-		
-		JButton leftButton = new JButton( "Left" );
-		result.add( leftButton, BorderLayout.WEST );
-		leftButton.addActionListener( new ActionListener() {
-			
+
+		JButton leftButton = new JButton("Left");
+		result.add(leftButton, BorderLayout.WEST);
+		leftButton.addActionListener(new ActionListener() {
+
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				doMove(Model.Move.LEFT);
 			}
 		});
-		
-		JButton rightButton = new JButton( "Right" );
-		result.add( rightButton, BorderLayout.EAST );
-		rightButton.addActionListener( new ActionListener() {
-			
+
+		JButton rightButton = new JButton("Right");
+		result.add(rightButton, BorderLayout.EAST);
+		rightButton.addActionListener(new ActionListener() {
+
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				doMove(Model.Move.RIGHT); 
+				doMove(Model.Move.RIGHT);
 			}
 		});
-		
-		JButton downButton = new JButton( "Down" );
-		result.add( downButton, BorderLayout.SOUTH );
-		downButton.addActionListener( new ActionListener() {
-			
+
+		JButton downButton = new JButton("Down");
+		result.add(downButton, BorderLayout.SOUTH);
+		downButton.addActionListener(new ActionListener() {
+
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				doMove(Model.Move.DOWN);
 			}
-		});		
-		
+		});
+
 		return result;
 	}
 
 	void doMove(Model.Move move) {
 		model.generateNewField(move);
-		if( model.isGameActive() ) {
+		if (model.isGameActive()) {
 			screenField.invalidate();
-			scoresLabel.invalidate();			
+			scoresLabel.invalidate();
 			repaint();
-		} else if ( model.isGameOver() ) {
+		} else if (model.isGameOver()) {
 			JOptionPane.showMessageDialog(this, "GAME OVER!");
-			
+
 			// TODO: show "game over" message
 			ticker = null;
 			handleButton.setText("New Game");
@@ -159,6 +160,32 @@ public class Main extends Activity {
 
 	public ScoresCounter getScoresCounter() {
 		return counter;
+	}
+
+	@Override
+	public void keyPressed(KeyEvent event) {
+		switch( event.getKeyCode() ) {
+		case KeyEvent.VK_UP:
+			doMove(Model.Move.ROTATE); break;
+		case KeyEvent.VK_LEFT:	
+			doMove(Model.Move.LEFT); break;
+		case KeyEvent.VK_RIGHT:	
+			doMove(Model.Move.RIGHT); break;
+		case KeyEvent.VK_DOWN:	
+			doMove(Model.Move.DOWN); break;
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent arg0) {
+		// skipped
+
+	}
+
+	@Override
+	public void keyTyped(KeyEvent arg0) {
+		// skipped
+
 	}
 
 }

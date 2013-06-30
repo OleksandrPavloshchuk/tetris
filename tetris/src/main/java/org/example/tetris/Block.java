@@ -176,9 +176,9 @@ public class Block {
 			@Override
 			public Frame getFrame(int n) {
 				switch (n) {
-				case 1:
+				case 0:
 					return new Frame(3).add("011").add("110");
-				case 2:
+				case 1:
 					return new Frame(2).add("10").add("11").add("01");
 
 				}

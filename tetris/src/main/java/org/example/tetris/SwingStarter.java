@@ -1,5 +1,7 @@
 package org.example.tetris;
 
+import java.awt.event.KeyListener;
+
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
@@ -30,6 +32,10 @@ public class SwingStarter extends JFrame {
 		setContentPane( activity );
 		activity.onCreate(null);
 		setSize( 400, 600 );
+		if( KeyListener.class.isInstance(activity) ) {
+			KeyListener l = KeyListener.class.cast(activity);
+			addKeyListener(l);
+		}
 		setVisible(true);
 	}
 }
