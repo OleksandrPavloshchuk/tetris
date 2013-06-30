@@ -65,12 +65,9 @@ public class ScreenField extends JPanel {
 	}
 
 	private void drawCell(Graphics gr, int x, int y, Color colorFG) {
-		
-		gr.setColor(COLOR_BACKGROUND);
 		Dimension cellSize = getCellSize();		
-		gr.drawRect(x, y, cellSize.width, cellSize.height);
 		gr.setColor(colorFG);
-		gr.fillRect(x + 1, y + 1, cellSize.width - 1, cellSize.height - 1);
+		gr.fillRoundRect(x + 1, y + 1, cellSize.width - 1, cellSize.height -1 , 2 , 2);
 	}
 
 }
