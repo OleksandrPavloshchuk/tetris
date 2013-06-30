@@ -29,6 +29,8 @@ public class Main extends Activity {
 	private final ScreenField screenField = new ScreenField(model);
 
 	public Main() {
+		setFocusable(true);
+		addKeyListener(this);
 		setLayout(new BorderLayout());
 		add(createHeader(), BorderLayout.NORTH);
 		add(createCanvas(), BorderLayout.CENTER);
@@ -164,7 +166,10 @@ public class Main extends Activity {
 
 	@Override
 	public void keyPressed(KeyEvent event) {
-		switch( event.getKeyCode() ) {
+		
+		int keyCode = event.getKeyCode();
+		
+		switch( keyCode ) {
 		case KeyEvent.VK_UP:
 			doMove(Model.Move.ROTATE); break;
 		case KeyEvent.VK_LEFT:	
@@ -177,15 +182,13 @@ public class Main extends Activity {
 	}
 
 	@Override
-	public void keyReleased(KeyEvent arg0) {
+	public void keyReleased(KeyEvent event) {
 		// skipped
-
 	}
 
 	@Override
-	public void keyTyped(KeyEvent arg0) {
-		// skipped
-
+	public void keyTyped(KeyEvent event) {
+		// skipped	
 	}
 
 }

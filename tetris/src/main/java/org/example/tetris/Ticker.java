@@ -28,6 +28,7 @@ public class Ticker extends SwingWorker<Void, Model.Move> {
 
 		Model model = action.getModel();
 		while (!model.isGameOver()) {
+			
 			if( isCancelled() ) {
 				return null;
 			}
