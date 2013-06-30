@@ -5,67 +5,74 @@
 package org.example.tetris;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.example.gui.swing.Activity;
 import org.example.gui.swing.Bundle;
-import org.example.gui.swing.Canvas;
 
 @SuppressWarnings("serial")
 public class Main extends Activity {
 
 	private Ticker ticker;
 
-	private JLabel scoresLabel = new JLabel();
-	private JButton handleButton = new JButton("New Game");
-	private final ScoresCounter counter = new ScoresCounter( scoresLabel );
+	private final JLabel scoresLabel = new JLabel();
+	private final JButton handleButton = new JButton("New Game");
+	private final ScoresCounter counter = new ScoresCounter(scoresLabel);
 	private final Model model = new Model(counter);
-	private ScreenField screenField = new ScreenField( model );
+	private final ScreenField screenField = new ScreenField(model);
 
 	public Main() {
 		setLayout(new BorderLayout());
-		add(createHeader(), BorderLayout.NORTH );
-		add(createCanvas(), BorderLayout.CENTER );
+		add(createHeader(), BorderLayout.NORTH);
+		add(createCanvas(), BorderLayout.CENTER);
 	}
 
 	private JPanel createHeader() {
 		JPanel result = new JPanel();
 		result.setLayout(new BorderLayout());
-		result.add(scoresLabel, BorderLayout.CENTER );
+		result.add(scoresLabel, BorderLayout.CENTER);
 		handleButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				if (model.isGameActive()) {
-					// TODO: pause game
+					if( null!=ticker ) {
+						ticker.setPause(true);
+					}
 					handleButton.setText("Resume");
 				} else {
+					if( null!=ticker ) {
+						ticker.setPause(false);
+					}
 					handleButton.setText("Pause");
 					startNewGame();
 				}
 			}
 		});
-		result.add(handleButton, BorderLayout.WEST );
-		
-		JButton exitButton = new JButton( "Exit" );
-		exitButton.addActionListener( new ActionListener() {
-			
+		result.add(handleButton, BorderLayout.WEST);
+
+		JButton exitButton = new JButton("Exit");
+		exitButton.addActionListener(new ActionListener() {
+
 			@Override
 			public void actionPerformed(ActionEvent event) {
+				if( null!=ticker ) {
+					ticker.cancel(true);
+				}
+				finish();
 				System.exit(0);
 			}
 		});
-		result.add(exitButton, BorderLayout.EAST );
-		
+		result.add(exitButton, BorderLayout.EAST);
 
 		return result;
 	}
-	
+
 	private JPanel createCanvas() {
 		JPanel result = new JPanel();
 		
@@ -78,8 +85,8 @@ public class Main extends Activity {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				model.generateNewField(Model.Move.ROTATE);
-				repaint();				}
+				doMove(Model.Move.ROTATE);
+			}
 		});
 		
 		JButton leftButton = new JButton( "Left" );
@@ -88,8 +95,8 @@ public class Main extends Activity {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				model.generateNewField(Model.Move.LEFT);
-				repaint();				}
+				doMove(Model.Move.LEFT);
+			}
 		});
 		
 		JButton rightButton = new JButton( "Right" );
@@ -98,8 +105,8 @@ public class Main extends Activity {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				model.generateNewField(Model.Move.RIGHT);
-				repaint();				}
+				doMove(Model.Move.RIGHT); 
+			}
 		});
 		
 		JButton downButton = new JButton( "Down" );
@@ -108,11 +115,26 @@ public class Main extends Activity {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				model.generateNewField(Model.Move.DOWN);
-				repaint();				}
+				doMove(Model.Move.DOWN);
+			}
 		});		
 		
 		return result;
+	}
+
+	void doMove(Model.Move move) {
+		model.generateNewField(move);
+		if( model.isGameActive() ) {
+			screenField.invalidate();
+			scoresLabel.invalidate();			
+			repaint();
+		} else if ( model.isGameOver() ) {
+			JOptionPane.showMessageDialog(this, "GAME OVER!");
+			
+			// TODO: show "game over" message
+			ticker = null;
+			handleButton.setText("New Game");
+		}
 	}
 
 	@Override
@@ -125,7 +147,7 @@ public class Main extends Activity {
 			model.gameStart();
 			// TODO: use android related handler and messages
 			ticker = new Ticker(this);
-			ticker.start();
+			ticker.execute();
 		}
 	}
 

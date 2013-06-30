@@ -4,38 +4,43 @@
 
 package org.example.tetris;
 
-public class Ticker extends Thread {
-	private Main m_app = null;
-	private int m_nDelay = 400;
+import javax.swing.SwingWorker;
 
-	Ticker(Main app) {
-		m_app = app;
-	}
+public class Ticker extends SwingWorker<Void, Model.Move> {
 
-	@Override
-	public void run() {
-		try {
-			Model model = m_app.getModel();
-			while (!model.isGameOver()) {
-				synchronized (model) {
-					if (!model.isGameActive()) {
-						continue;
-					}
+	private boolean pause = false;
+	private Main action = null;
+	private int delay = 400;
 
-					sleep(m_nDelay);
-					model.generateNewField(Model.Move.DOWN);
-					m_app.repaint();
-				}
-			}
-		} catch (InterruptedException ex) {
-		}
+	Ticker(Main action) {
+		this.action = action;
 	}
 
 	public void setDelay(int nDelay) {
-		m_nDelay = nDelay;
+		delay = nDelay;
 	}
 
 	public int getDelay() {
-		return m_nDelay;
+		return delay;
+	}
+	
+	public void setPause( boolean pause ) {
+		this.pause = pause;
+	}
+
+	@Override
+	protected Void doInBackground() throws Exception {
+
+		Model model = action.getModel();
+		while (!model.isGameOver()) {
+			if( isCancelled() ) {
+				return null;
+			}
+			if( !pause ) {
+				Thread.sleep(delay);
+				action.doMove(Model.Move.DOWN);
+			}
+		}
+		return null;
 	}
 }

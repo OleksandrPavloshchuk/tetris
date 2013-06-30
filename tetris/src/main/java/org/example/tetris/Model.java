@@ -78,7 +78,8 @@ public class Model {
 	/**
 	 * Create and check the array of new data:
 	 */
-	public synchronized void generateNewField(Move move) {
+	public synchronized void generateNewField(Move move) {	
+		
 		if (!isGameActive()) {
 			return;
 		}

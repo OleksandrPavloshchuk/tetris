@@ -56,23 +56,16 @@ public class ScreenField extends JPanel {
 
 		int x = col * cellSize.width ;
 		int y = row * cellSize.height;
-
-		switch (nStatus) {
-
-		case Block.CELL_EMPTY:
-			gr.setColor(COLOR_BACKGROUND);
-			gr.fillRect(x, y, cellSize.width, cellSize.height);
-			break;
-		case Block.CELL_DYNAMIC:
-			drawCell(gr, x, y, model.getActiveBlockColor());
-			break;
-		default:
-			drawCell(gr, x, y, Block.getColorForStaticValue(nStatus));
+		
+		if( Block.CELL_EMPTY!=nStatus ) {
+			Color color = Block.CELL_DYNAMIC!=nStatus ? model.getActiveBlockColor() :
+				Block.getColorForStaticValue(nStatus);
+			drawCell(gr, x, y, color);
 		}
-
 	}
 
 	private void drawCell(Graphics gr, int x, int y, Color colorFG) {
+		
 		gr.setColor(COLOR_BACKGROUND);
 		Dimension cellSize = getCellSize();		
 		gr.drawRect(x, y, cellSize.width, cellSize.height);

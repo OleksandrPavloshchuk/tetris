@@ -12,14 +12,4 @@ public class Activity extends JPanel {
 	public void onCreate( Bundle storedState ) {
 		// For compatibility
 	}
-
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// For compatibility
-		return true;
-	}	
-	
-	public boolean onOptionsItemSelected( MenuItem menuItem ) {
-		// For compatibility
-		return true;
-	}
 }
