@@ -7,124 +7,67 @@ package org.example.tetris;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Point;
 
-public class ScreenField extends ScreenBase {
-	
-	private static final Color COLOR_BACKGROUND = new Color( 0xeeffcc );
+import javax.swing.JPanel;
 
-	private Model model = null;
+@SuppressWarnings("serial")
+public class ScreenField extends JPanel {
 
-	// geometric sizes:
-	private int m_nCellW = 0;
-	private int m_nCellH = 0;
 	static private final int MARGIN = 2;
+	private static final Color COLOR_BACKGROUND = new Color(0xeeffcc);
 
-	/**
-	 * Constructor
-	 * 
-	 * @param a_model
-	 *            model to represent Tetris data
-	 */
+	private final Model model;
+
 	public ScreenField(Model model) {
-		this.model = model;		
+		this.model = model;
 	}
-	
-	@Override
-	public void setCanvasSize( Dimension canvasSize ) {
-		super.setCanvasSize(canvasSize);
-		Dimension size = getSize();
-		m_nCellW = ( size.width - (MARGIN << 1)) / Model.NUM_COLS;
-		m_nCellH = ( size.height - (MARGIN << 1)) / Model.NUM_ROWS;
-	}	
-	
-	@Override
-	protected double getTop() {
-		return 0.125;
-	}
-
-	@Override
-	protected double getLeft() {
-		return 0.125;
-	}
-
-	@Override
-	protected double getWidth() {
-		return 0.75;
-	}
-
-	@Override
-	protected double getHeight() {
-		return 0.75;
-	}	
 
 	@Override
 	public void paint(Graphics gr) {
-
-		// draw the frame:
-		Point p = getLocation();
-		int x = p.x - MARGIN;
-		int y = p.y - MARGIN;
-		final Dimension size = getSize();
-		final int width = 2 * MARGIN + size.width;
-		final int height = 2 * MARGIN + size.height;
-		gr.setColor( COLOR_BACKGROUND );
-		gr.fillRect(x, y, width, height);
-		gr.setColor( new Color( 0x336633 ));
-		gr.drawRect(x, y, width, height);
-
+		drawFrame(gr);
+		
 		// draw all the cells:
 		for (int i = 0; i < Model.NUM_ROWS; i++) {
 			for (int j = 0; j < Model.NUM_COLS; j++) {
 				drawCell(gr, i, j);
 			}
 		}
-
+		
 	}
 
-	/**
-	 * Draw the cell
-	 * 
-	 * @param a_graphics
-	 *            graphics to draw
-	 * @param a_status
-	 *            the cell status: empty, static or dynamic figure
-	 * @param a_row
-	 *            row of the cell
-	 * @param a_col
-	 *            column of the cell
-	 */
-	private void drawCell(Graphics gr, int nRow, int nCol) {
+	private void drawFrame(Graphics gr) {
+		Dimension size = getSize();
+		gr.setColor(COLOR_BACKGROUND);
+		gr.fillRect(0, 0, size.width, size.height);
+	}
 
-		byte nStatus = model.getCellStatus(nRow, nCol);
+	private Dimension getCellSize() {
+		Dimension size = getSize();
+		int cellWidth = (size.width - (MARGIN << 1)) / Model.NUM_COLS;
+		int cellHeight = (size.height - (MARGIN << 1)) / Model.NUM_ROWS;
+		return new Dimension(cellWidth, cellHeight);
+	}
+
+	private void drawCell(Graphics gr, int row, int col) {
+
+		byte nStatus = model.getCellStatus(row, col);
+
+		Dimension cellSize = getCellSize();
+
+		int x = col * cellSize.width ;
+		int y = row * cellSize.height;
 		
-		Point p = getLocation();
-
-		int x = nCol * m_nCellW + p.x;
-		int y = nRow * m_nCellH + p.y;
-		
-		switch (nStatus) {
-
-		case Block.CELL_EMPTY:
-
-			gr.setColor(COLOR_BACKGROUND);
-			gr.fillRect(x, y, m_nCellW, m_nCellH);
-			break;
-
-		case Block.CELL_DYNAMIC:
-			drawCell(gr, x, y, model.getActiveBlockColor());
-			break;
-		default:
-			drawCell(gr, x, y, Block.getColorForStaticValue( nStatus ));
+		if( Block.CELL_EMPTY!=nStatus ) {
+			Color color = Block.CELL_DYNAMIC==nStatus ? model.getActiveBlockColor() :
+				Block.getColorForStaticValue(nStatus);
+			drawCell(gr, x, y, color);
 		}
-
 	}
 
 	private void drawCell(Graphics gr, int x, int y, Color colorFG) {
-		gr.setColor( COLOR_BACKGROUND );
-		gr.drawRect(x, y, m_nCellW, m_nCellH);
-		gr.setColor( colorFG );
-		gr.fillRect(x + 1, y + 1, m_nCellW - 1, m_nCellH - 1);
+		Dimension cellSize = getCellSize();		
+		gr.setColor(colorFG);
+		gr.fillRoundRect(x + 1, y + 1, cellSize.width - 1, cellSize.height -1 , 2 , 2);
 	}
 
 }

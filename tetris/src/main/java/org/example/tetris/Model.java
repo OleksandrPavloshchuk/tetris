@@ -4,12 +4,14 @@
 package org.example.tetris;
 
 import java.awt.Color;
+import java.awt.Point;
 
 public class Model {
-	
+
 	public enum Move {
 		LEFT, RIGHT, DOWN, ROTATE
 	}
+
 	public enum GameStatus {
 		EMPTY, ACTIVE, SUSPENDED, OVER
 	}
@@ -34,13 +36,13 @@ public class Model {
 		field = new byte[NUM_ROWS][NUM_COLS];
 		this.counter = counter;
 	}
-	
+
 	public boolean isGameActive() {
 		return GameStatus.ACTIVE.equals(gameStatus);
 	}
-	
+
 	public boolean isGameOver() {
-		return GameStatus.OVER.equals(gameStatus);		
+		return GameStatus.OVER.equals(gameStatus);
 	}
 
 	public void reset() {
@@ -55,35 +57,42 @@ public class Model {
 		field[nRow][nCol] = nStatus;
 	}
 
-	// Game status:
-	public GameStatus getGameStatus() {
-		return gameStatus;
-	}
-
-	public void setGameStatus( GameStatus gameStatus) {
+	public void setGameStatus(GameStatus gameStatus) {
 		this.gameStatus = gameStatus;
 	}
 
 	// Start the game:
 	public void gameStart() {
-		if( isGameActive() ) {
+		if (isGameActive()) {
 			return;
 		}
-		setGameStatus( GameStatus.ACTIVE );
+		setGameActive();
 		activeBlock = Block.createBlock();
 	}
+
+	public void setGameActive() {
+		setGameStatus(GameStatus.ACTIVE);
+	}
+	
+	public void setGamePaused() {
+		setGameStatus(GameStatus.SUSPENDED);
+	}
+
+	public boolean isGamePaused() {
+		return GameStatus.SUSPENDED.equals(gameStatus);
+	}	
 
 	/**
 	 * Create and check the array of new data:
 	 */
-	public synchronized void generateNewField(Move move) {
-		if( !isGameActive()) {
+	public synchronized void generateNewField(Move move) {	
+		
+		if (!isGameActive()) {
 			return;
 		}
 
 		// get the parameters of block:
-		int nX = activeBlock.getLeftX();
-		int nY = activeBlock.getTopY();
+		Point newTopLeft = new Point(activeBlock.getTopLeft());
 		int nFrame = activeBlock.getFrame();
 
 		// Clear the old values:
@@ -92,13 +101,13 @@ public class Model {
 		// count new parameters:
 		switch (move) {
 		case LEFT:
-			nX--;
+			newTopLeft.x--;
 			break;
 		case RIGHT:
-			nX++;
+			newTopLeft.x++;
 			break;
 		case DOWN:
-			nY++;
+			newTopLeft.y++;
 			break;
 		case ROTATE:
 			nFrame++;
@@ -106,19 +115,18 @@ public class Model {
 				nFrame = 0;
 			break;
 		}
-		if (!isMoveValid(nY, nX, nFrame)) {
-			
+		if (!isMoveValid(newTopLeft, nFrame)) {
+
 			// set old the block:
-			isMoveValid(activeBlock.getTopY(), activeBlock.getLeftX(),
-					activeBlock.getFrame());
-			
-			if( Move.DOWN.equals(move) ) {
+			isMoveValid(activeBlock.getTopLeft(), activeBlock.getFrame());
+
+			if (Move.DOWN.equals(move)) {
 
 				// add the scores:
 				counter.addScores();
 
 				if (!newBlock()) {
-					setGameStatus( GameStatus.OVER );
+					setGameStatus(GameStatus.OVER);
 					activeBlock = null;
 					reset(false);
 					return;
@@ -128,7 +136,7 @@ public class Model {
 			return;
 		} else {
 			// Make the new move:
-			activeBlock.setState(nFrame, nY, nX);
+			activeBlock.setState(nFrame, newTopLeft);
 		}
 	}
 
@@ -150,37 +158,42 @@ public class Model {
 		}
 	}
 
-	/**
-	 * Check the movement validity
-	 * 
-	 * @return true - movement is OK, false - some error
-	 */
-	private final boolean isMoveValid(int nY, int nX, int nFrame) {
+	private final boolean isMoveValid(Point newTopLeft, int nFrame) {
 		synchronized (field) {
 			byte[][] shape = activeBlock.getShape(nFrame);
 
-			// Check coords first:
-			if (nY < 0)
+			if (newTopLeft.y < 0) {
 				return false;
-			if (nX < 0)
+			}
+			if (newTopLeft.x < 0) {
 				return false;
-			if (nY + shape.length > NUM_ROWS)
+			}
+			if (newTopLeft.y + shape.length > NUM_ROWS) {
 				return false;
-			if (nX + shape[0].length > NUM_COLS)
+			}
+			if (newTopLeft.x + shape[0].length > NUM_COLS) {
 				return false;
+			}
 
 			// Check all the items in field:
 			for (int i = 0; i < shape.length; i++) {
 				for (int j = 0; j < shape[i].length; j++) {
-					if (shape[i][j] + field[i + nY][j + nX] > Block.CELL_DYNAMIC)
+					int y = newTopLeft.y + i;
+					int x = newTopLeft.x + j;
+					if( Block.CELL_EMPTY!=shape[i][j] && Block.CELL_EMPTY!=field[y][x]) {
 						return false;
+					}
 				}
 			}
 
 			// All cell is correct - add the data:
 			for (int i = 0; i < shape.length; i++) {
 				for (int j = 0; j < shape[i].length; j++) {
-					field[i + nY][j + nX] += shape[i][j];
+					int y = newTopLeft.y + i;
+					int x = newTopLeft.x + j;
+					if( Block.CELL_EMPTY!=shape[i][j]) {
+						field[y][x] = shape[i][j];
+					}
 				}
 			}
 			return true;
@@ -199,9 +212,9 @@ public class Model {
 		for (int i = 0; i < field.length; i++) {
 			for (int j = 0; j < field[i].length; j++) {
 				byte status = getCellStatus(i, j);
-				if ( status == Block.CELL_DYNAMIC) {
+				if (status == Block.CELL_DYNAMIC) {
 					status = activeBlock.getStaticValue();
-					setCellStatus(i, j, status );
+					setCellStatus(i, j, status);
 				}
 			}
 		}
@@ -210,7 +223,7 @@ public class Model {
 			boolean bFullRow = true;
 			for (int j = 0; j < field[i].length; j++) {
 				byte status = getCellStatus(i, j);
-				boolean isEmpty = Block.CELL_EMPTY==status;
+				boolean isEmpty = Block.CELL_EMPTY == status;
 				bFullRow &= !isEmpty;
 			}
 			if (bFullRow) {
@@ -225,8 +238,7 @@ public class Model {
 		activeBlock = Block.createBlock();
 
 		// Check the validity of new block:
-		if (!isMoveValid(activeBlock.getTopY(), activeBlock.getLeftX(),
-				activeBlock.getFrame())) {
+		if (!isMoveValid(activeBlock.getTopLeft(), activeBlock.getFrame())) {
 			// GAME IS OVER!
 			counter.reset();
 			return false;
