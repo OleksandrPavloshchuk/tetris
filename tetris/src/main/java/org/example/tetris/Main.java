@@ -23,7 +23,7 @@ public class Main extends Activity {
 	private Ticker ticker;
 
 	private final JLabel scoresLabel = new JLabel();
-	private final JButton handleButton = new JButton("New Game");
+	private JButton handleButton;
 	private final ScoresCounter counter = new ScoresCounter(scoresLabel);
 	private final Model model = new Model(counter);
 	private final ScreenField screenField = new ScreenField(model);
@@ -38,25 +38,23 @@ public class Main extends Activity {
 		JPanel result = new JPanel();
 		result.setLayout(new BorderLayout());
 		result.add(scoresLabel, BorderLayout.CENTER);
-		handleButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				if (model.isGameActive()) {
-					model.setGamePaused();
-					handleButton.setText("Resume");
-				} else if (model.isGamePaused()) {
-					model.setGameActive();
-					handleButton.setText("Pause");
-				} else {
-					handleButton.setText("Pause");
-					startNewGame();
-				}
-			}
-		});
-		result.add(handleButton, BorderLayout.WEST);
-
-		JButton exitButton = new JButton("Exit");
-		exitButton.addActionListener(new ActionListener() {
+		result.add(
+				handleButton = createButton("New Game", new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent event) {
+						if (model.isGameActive()) {
+							model.setGamePaused();
+							handleButton.setText("Resume");
+						} else if (model.isGamePaused()) {
+							model.setGameActive();
+							handleButton.setText("Pause");
+						} else {
+							handleButton.setText("Pause");
+							startNewGame();
+						}
+					}
+				}), BorderLayout.WEST);
+		result.add(createButton("Exit", new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent event) {
@@ -66,8 +64,7 @@ public class Main extends Activity {
 				finish();
 				System.exit(0);
 			}
-		});
-		result.add(exitButton, BorderLayout.EAST);
+		}), BorderLayout.EAST);
 
 		return result;
 	}
@@ -78,46 +75,44 @@ public class Main extends Activity {
 		result.setLayout(new BorderLayout());
 		result.add(screenField, BorderLayout.CENTER);
 
-		JButton rotateButton = new JButton("Rotate");
-		result.add(rotateButton, BorderLayout.NORTH);
-		rotateButton.addActionListener(new ActionListener() {
+		result.add(createButton("Rotate", new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				doMove(Model.Move.ROTATE);
 			}
-		});
+		}), BorderLayout.NORTH);
 
-		JButton leftButton = new JButton("Left");
-		result.add(leftButton, BorderLayout.WEST);
-		leftButton.addActionListener(new ActionListener() {
+		result.add(createButton("Left", new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				doMove(Model.Move.LEFT);
 			}
-		});
+		}), BorderLayout.WEST);
 
-		JButton rightButton = new JButton("Right");
-		result.add(rightButton, BorderLayout.EAST);
-		rightButton.addActionListener(new ActionListener() {
+		result.add(createButton("Right", new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				doMove(Model.Move.RIGHT);
 			}
-		});
+		}), BorderLayout.EAST);
 
-		JButton downButton = new JButton("Down");
-		result.add(downButton, BorderLayout.SOUTH);
-		downButton.addActionListener(new ActionListener() {
+		result.add(createButton("Down", new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				doMove(Model.Move.DOWN);
 			}
-		});
+		}), BorderLayout.SOUTH);
 
+		return result;
+	}
+
+	private static JButton createButton(String text, ActionListener l) {
+		final JButton result = new JButton(text);
+		result.addActionListener(l);
 		return result;
 	}
 
@@ -163,21 +158,25 @@ public class Main extends Activity {
 	}
 
 	public void keyPressed(KeyEvent event) {
-		if( !model.isGameActive() ) {
+		if (!model.isGameActive()) {
 			return;
 		}
-		
+
 		int keyCode = event.getKeyCode();
-		
-		switch( keyCode ) {
+
+		switch (keyCode) {
 		case KeyEvent.VK_UP:
-			doMove(Model.Move.ROTATE); break;
-		case KeyEvent.VK_LEFT:	
-			doMove(Model.Move.LEFT); break;
-		case KeyEvent.VK_RIGHT:	
-			doMove(Model.Move.RIGHT); break;
-		case KeyEvent.VK_DOWN:	
-			doMove(Model.Move.DOWN); break;
+			doMove(Model.Move.ROTATE);
+			break;
+		case KeyEvent.VK_LEFT:
+			doMove(Model.Move.LEFT);
+			break;
+		case KeyEvent.VK_RIGHT:
+			doMove(Model.Move.RIGHT);
+			break;
+		case KeyEvent.VK_DOWN:
+			doMove(Model.Move.DOWN);
+			break;
 		}
 	}
 
