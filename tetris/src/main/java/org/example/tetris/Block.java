@@ -44,8 +44,15 @@ public class Block {
 		return color.color;
 	}
 
-	public byte getStaticValue() {
+	public byte getStatusValue() {
 		return color.value;
+	}
+
+	public int getNextFrame(int frame) {
+		if (frame + 1 >= getFramesCount()) {
+			return 0;
+		}
+		return frame + 1;
 	}
 
 	public static Color getColorForStaticValue(byte b) {
