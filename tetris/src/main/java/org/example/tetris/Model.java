@@ -79,23 +79,16 @@ public class Model {
 		return GameStatus.SUSPENDED.equals(gameStatus);
 	}
 
-	/**
-	 * Create and check the array of new data:
-	 */
 	public synchronized void generateNewField(Move move) {
 
 		if (!isGameActive()) {
 			return;
 		}
-
-		// get the parameters of block:
 		Point newTopLeft = new Point(activeBlock.getTopLeft());
-		int nFrame = activeBlock.getFrame();
+		int frame = activeBlock.getFrame();
 
-		// Clear the old values:
 		resetMovingBlock();
 
-		// count new parameters:
 		switch (move) {
 		case LEFT:
 			newTopLeft.x--;
@@ -107,14 +100,11 @@ public class Model {
 			newTopLeft.y++;
 			break;
 		case ROTATE:
-			nFrame++;
-			if (nFrame >= activeBlock.getFramesCount())
-				nFrame = 0;
+			frame = activeBlock.getNextFrame(frame);
 			break;
 		}
-		if (isMoveValid(newTopLeft, nFrame)) {
-			// Make the new move:
-			activeBlock.setState(nFrame, newTopLeft);
+		if (isMoveValid(newTopLeft, frame)) {
+			activeBlock.setState(frame, newTopLeft);
 			return;
 		}
 
@@ -122,10 +112,7 @@ public class Model {
 		isMoveValid();
 
 		if (Move.DOWN.equals(move)) {
-
-			// add the scores:
 			counter.addScores();
-
 			if (!newBlock()) {
 				setGameStatus(GameStatus.OVER);
 				activeBlock = null;
@@ -193,10 +180,10 @@ public class Model {
 		return isMoveValid(activeBlock.getTopLeft(), activeBlock.getFrame());
 	}
 
-	private final boolean isMoveValid(Point newTopLeft, int nFrame) {
+	private final boolean isMoveValid(Point newTopLeft, int frame) {
 
 		synchronized (field) {
-			byte[][] shape = activeBlock.getShape(nFrame);
+			byte[][] shape = activeBlock.getShape(frame);
 			if (!isValid(newTopLeft)) {
 				return false;
 			}
@@ -245,7 +232,7 @@ public class Model {
 			public boolean processCell(int y, int x) {
 				byte status = getCellStatus(y, x);
 				if (Block.CELL_DYNAMIC == status) {
-					status = activeBlock.getStaticValue();
+					status = activeBlock.getStatusValue();
 					setCellStatus(y, x, status);
 				}
 				return true;
