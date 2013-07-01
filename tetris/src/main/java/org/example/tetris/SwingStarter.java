@@ -32,7 +32,6 @@ public class SwingStarter extends JFrame {
 		super(title);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setContentPane(activity);
-		addKeyListener(activity);
 		activity.onCreate(null);
 		setSize(400, 600);
 		bindKeyboardEventListner(activity);
