@@ -13,7 +13,7 @@ public class Model {
 	}
 
 	public enum GameStatus {
-		EMPTY, ACTIVE, SUSPENDED, OVER
+		ACTIVE, SUSPENDED, OVER
 	}
 
 	// some constants in the model:
@@ -21,7 +21,7 @@ public class Model {
 	public static final int NUM_ROWS = 20; // number of rows in field
 
 	// game status constants:
-	private GameStatus gameStatus = GameStatus.EMPTY;
+	private GameStatus gameStatus = GameStatus.OVER;
 
 	// array of cell values:
 	private byte[][] field = null;
@@ -45,10 +45,6 @@ public class Model {
 		return GameStatus.OVER.equals(gameStatus);
 	}
 
-	public void reset() {
-		reset(false); // call the inner method - reset the all data
-	}
-
 	public byte getCellStatus(int nRow, int nCol) {
 		return field[nRow][nCol];
 	}
@@ -66,6 +62,7 @@ public class Model {
 		if (isGameActive()) {
 			return;
 		}
+		counter.reset();
 		setGameActive();
 		activeBlock = Block.createBlock();
 	}
@@ -73,20 +70,20 @@ public class Model {
 	public void setGameActive() {
 		setGameStatus(GameStatus.ACTIVE);
 	}
-	
+
 	public void setGamePaused() {
 		setGameStatus(GameStatus.SUSPENDED);
 	}
 
 	public boolean isGamePaused() {
 		return GameStatus.SUSPENDED.equals(gameStatus);
-	}	
+	}
 
 	/**
 	 * Create and check the array of new data:
 	 */
-	public synchronized void generateNewField(Move move) {	
-		
+	public synchronized void generateNewField(Move move) {
+
 		if (!isGameActive()) {
 			return;
 		}
@@ -96,7 +93,7 @@ public class Model {
 		int nFrame = activeBlock.getFrame();
 
 		// Clear the old values:
-		reset(true);
+		resetMovingBlock();
 
 		// count new parameters:
 		switch (move) {
@@ -115,63 +112,95 @@ public class Model {
 				nFrame = 0;
 			break;
 		}
-		if (!isMoveValid(newTopLeft, nFrame)) {
-
-			// set old the block:
-			isMoveValid(activeBlock.getTopLeft(), activeBlock.getFrame());
-
-			if (Move.DOWN.equals(move)) {
-
-				// add the scores:
-				counter.addScores();
-
-				if (!newBlock()) {
-					setGameStatus(GameStatus.OVER);
-					activeBlock = null;
-					reset(false);
-					return;
-				}
-			}
-
-			return;
-		} else {
+		if (isMoveValid(newTopLeft, nFrame)) {
 			// Make the new move:
 			activeBlock.setState(nFrame, newTopLeft);
+			return;
+		}
+
+		// Check the old block
+		isMoveValid();
+
+		if (Move.DOWN.equals(move)) {
+
+			// add the scores:
+			counter.addScores();
+
+			if (!newBlock()) {
+				setGameStatus(GameStatus.OVER);
+				activeBlock = null;
+				reset();
+				return;
+			}
 		}
 	}
 
-	// ================================================
-	// Helper functions:
+	public interface FieldIterator {
+		boolean processCell(int y, int x);
+	}
 
-	/**
-	 * Reset the field data:
-	 * 
-	 * @param true - clear only dynamic data, false - clear all the data
-	 */
-	private final void reset(boolean bDynamicDataOnly) {
+	private abstract class EmptyCellSetter implements FieldIterator {
+
+		protected abstract boolean doesSatisfy(byte value);
+
+		@Override
+		public final boolean processCell(int y, int x) {
+			if (doesSatisfy(field[y][x])) {
+				field[y][x] = Block.CELL_EMPTY;
+			}
+			return true;
+		}
+	}
+
+	public boolean iterateByField(FieldIterator iterator) {
 		for (int i = 0; i < NUM_ROWS; i++) {
 			for (int j = 0; j < NUM_COLS; j++) {
-				if (!bDynamicDataOnly || field[i][j] == Block.CELL_DYNAMIC) {
-					field[i][j] = Block.CELL_EMPTY;
+				if (!iterator.processCell(i, j)) {
+					return false;
 				}
 			}
 		}
+		return true;
+	}
+
+	public final void reset() {
+		iterateByField(new EmptyCellSetter() {
+			@Override
+			protected boolean doesSatisfy(byte value) {
+				return true;
+			}
+		});
+	}
+
+	public final void resetMovingBlock() {
+		iterateByField(new EmptyCellSetter() {
+			@Override
+			protected boolean doesSatisfy(byte value) {
+				return Block.CELL_DYNAMIC == value;
+			}
+		});
+	}
+
+	private static final boolean isValid(Point p) {
+		return 0 <= p.x && 0 <= p.y;
+	}
+
+	private static final boolean isValid(Point p, byte[][] s) {
+		return NUM_ROWS >= p.y + s.length && NUM_COLS >= p.x + s[0].length;
+	}
+	
+	private final boolean isMoveValid() {
+		return isMoveValid( activeBlock.getTopLeft(), activeBlock.getFrame());
 	}
 
 	private final boolean isMoveValid(Point newTopLeft, int nFrame) {
+		
 		synchronized (field) {
 			byte[][] shape = activeBlock.getShape(nFrame);
-
-			if (newTopLeft.y < 0) {
+			if (!isValid(newTopLeft)) {
 				return false;
 			}
-			if (newTopLeft.x < 0) {
-				return false;
-			}
-			if (newTopLeft.y + shape.length > NUM_ROWS) {
-				return false;
-			}
-			if (newTopLeft.x + shape[0].length > NUM_COLS) {
+			if (!isValid(newTopLeft, shape)) {
 				return false;
 			}
 
@@ -180,7 +209,8 @@ public class Model {
 				for (int j = 0; j < shape[i].length; j++) {
 					int y = newTopLeft.y + i;
 					int x = newTopLeft.x + j;
-					if( Block.CELL_EMPTY!=shape[i][j] && Block.CELL_EMPTY!=field[y][x]) {
+					if (Block.CELL_EMPTY != shape[i][j]
+							&& Block.CELL_EMPTY != field[y][x]) {
 						return false;
 					}
 				}
@@ -191,7 +221,7 @@ public class Model {
 				for (int j = 0; j < shape[i].length; j++) {
 					int y = newTopLeft.y + i;
 					int x = newTopLeft.x + j;
-					if( Block.CELL_EMPTY!=shape[i][j]) {
+					if (Block.CELL_EMPTY != shape[i][j]) {
 						field[y][x] = shape[i][j];
 					}
 				}
@@ -209,15 +239,18 @@ public class Model {
 	private synchronized boolean newBlock() {
 
 		// set all the dynamic data as static:
-		for (int i = 0; i < field.length; i++) {
-			for (int j = 0; j < field[i].length; j++) {
-				byte status = getCellStatus(i, j);
-				if (status == Block.CELL_DYNAMIC) {
+		iterateByField(new FieldIterator() {
+
+			@Override
+			public boolean processCell(int y, int x) {
+				byte status = getCellStatus(y, x);
+				if (Block.CELL_DYNAMIC == status) {
 					status = activeBlock.getStaticValue();
-					setCellStatus(i, j, status);
+					setCellStatus(y, x, status);
 				}
+				return true;
 			}
-		}
+		});
 
 		for (int i = 0; i < field.length; i++) {
 			boolean bFullRow = true;
@@ -238,9 +271,8 @@ public class Model {
 		activeBlock = Block.createBlock();
 
 		// Check the validity of new block:
-		if (!isMoveValid(activeBlock.getTopLeft(), activeBlock.getFrame())) {
+		if (!isMoveValid()) {
 			// GAME IS OVER!
-			counter.reset();
 			return false;
 		}
 		return true;
