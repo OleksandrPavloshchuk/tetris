@@ -1,5 +1,7 @@
 package org.example.gui.swing;
 
+import java.awt.event.KeyEvent;
+
 import javax.swing.JPanel;
 
 @SuppressWarnings("serial")

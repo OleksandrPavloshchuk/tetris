@@ -171,7 +171,7 @@ public class Block {
 				case 2:
 					return new Frame(3).add("111").add("100");
 				case 3:
-					return new Frame(2).add("11").add("10").add("10");
+					return new Frame(2).add("11").add("01").add("01");
 				}
 				throw new IllegalArgumentException("Invalid frame number: " + n);
 			}
