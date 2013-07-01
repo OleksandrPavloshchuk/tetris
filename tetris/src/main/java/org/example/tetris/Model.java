@@ -49,7 +49,7 @@ public class Model {
 		return field[nRow][nCol];
 	}
 
-	public void setCellStatus(int nRow, int nCol, byte nStatus) {
+	private void setCellStatus(int nRow, int nCol, byte nStatus) {
 		field[nRow][nCol] = nStatus;
 	}
 
@@ -145,8 +145,8 @@ public class Model {
 
 		@Override
 		public final boolean processCell(int y, int x) {
-			if (doesSatisfy(field[y][x])) {
-				field[y][x] = Block.CELL_EMPTY;
+			if (doesSatisfy(getCellStatus(y, x))) {
+				setCellStatus(y, x, Block.CELL_EMPTY);
 			}
 			return true;
 		}
@@ -188,13 +188,13 @@ public class Model {
 	private static final boolean isValid(Point p, byte[][] s) {
 		return NUM_ROWS >= p.y + s.length && NUM_COLS >= p.x + s[0].length;
 	}
-	
+
 	private final boolean isMoveValid() {
-		return isMoveValid( activeBlock.getTopLeft(), activeBlock.getFrame());
+		return isMoveValid(activeBlock.getTopLeft(), activeBlock.getFrame());
 	}
 
 	private final boolean isMoveValid(Point newTopLeft, int nFrame) {
-		
+
 		synchronized (field) {
 			byte[][] shape = activeBlock.getShape(nFrame);
 			if (!isValid(newTopLeft)) {
@@ -255,8 +255,7 @@ public class Model {
 		for (int i = 0; i < field.length; i++) {
 			boolean bFullRow = true;
 			for (int j = 0; j < field[i].length; j++) {
-				byte status = getCellStatus(i, j);
-				boolean isEmpty = Block.CELL_EMPTY == status;
+				boolean isEmpty = Block.CELL_EMPTY == getCellStatus(i, j);
 				bFullRow &= !isEmpty;
 			}
 			if (bFullRow) {
