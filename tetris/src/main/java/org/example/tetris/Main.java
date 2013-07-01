@@ -129,7 +129,7 @@ public class Model {
 			if (!newBlock()) {
 				setGameStatus(GameStatus.OVER);
 				activeBlock = null;
-				resetMovingBlock();
+				reset();
 				return;
 			}
 		}
