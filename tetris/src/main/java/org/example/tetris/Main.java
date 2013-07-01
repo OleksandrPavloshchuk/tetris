@@ -118,8 +118,8 @@ public class Model {
 			return;
 		}
 
-		// set old the block:
-		isMoveValid(activeBlock.getTopLeft(), activeBlock.getFrame());
+		// Check the old block
+		isMoveValid();
 
 		if (Move.DOWN.equals(move)) {
 
@@ -188,8 +188,13 @@ public class Model {
 	private static final boolean isValid(Point p, byte[][] s) {
 		return NUM_ROWS >= p.y + s.length && NUM_COLS >= p.x + s[0].length;
 	}
+	
+	private final boolean isMoveValid() {
+		return isMoveValid( activeBlock.getTopLeft(), activeBlock.getFrame());
+	}
 
 	private final boolean isMoveValid(Point newTopLeft, int nFrame) {
+		
 		synchronized (field) {
 			byte[][] shape = activeBlock.getShape(nFrame);
 			if (!isValid(newTopLeft)) {
@@ -266,7 +271,7 @@ public class Model {
 		activeBlock = Block.createBlock();
 
 		// Check the validity of new block:
-		if (!isMoveValid(activeBlock.getTopLeft(), activeBlock.getFrame())) {
+		if (!isMoveValid()) {
 			// GAME IS OVER!
 			return false;
 		}
