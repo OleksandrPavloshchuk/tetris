@@ -23,14 +23,6 @@ public class ScoresCounter {
 		updateStatus();
 	}
 
-	public int getScores() {
-		return scores;
-	}
-
-	public int getLines() {
-		return lines;
-	}
-
 	public void addScores() {
 		scores += scoreDelta;
 		updateStatus();
@@ -43,6 +35,6 @@ public class ScoresCounter {
 	
 
 	private void updateStatus() {
-		status.setText( String.format( "Lines: %d Scores: %d", lines, scores));
+		status.setText( String.format( " Lines: %d Scores: %d", lines, scores));
 	}	
 }
