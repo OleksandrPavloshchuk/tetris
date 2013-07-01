@@ -25,14 +25,17 @@ public class ScreenField extends JPanel {
 	@Override
 	public void paint(Graphics gr) {
 		drawFrame(gr);
-		
-		// draw all the cells:
-		for (int i = 0; i < Model.NUM_ROWS; i++) {
-			for (int j = 0; j < Model.NUM_COLS; j++) {
-				drawCell(gr, i, j);
+		drawCells(gr);
+	}
+
+	private void drawCells(final Graphics gr) {
+		model.iterateByField(new Model.FieldIterator() {
+			@Override
+			public boolean processCell(int y, int x) {
+				drawCell(gr, y, x);
+				return true;
 			}
-		}
-		
+		});
 	}
 
 	private void drawFrame(Graphics gr) {
@@ -49,25 +52,27 @@ public class ScreenField extends JPanel {
 	}
 
 	private void drawCell(Graphics gr, int row, int col) {
-
-		byte nStatus = model.getCellStatus(row, col);
-
+		final byte status = model.getCellStatus(row, col);
+		if (Block.CELL_EMPTY == status) {
+			return;
+		}
 		Dimension cellSize = getCellSize();
 
-		int x = col * cellSize.width ;
+		int x = col * cellSize.width;
 		int y = row * cellSize.height;
-		
-		if( Block.CELL_EMPTY!=nStatus ) {
-			Color color = Block.CELL_DYNAMIC==nStatus ? model.getActiveBlockColor() :
-				Block.getColorForStaticValue(nStatus);
-			drawCell(gr, x, y, color);
-		}
+		drawCell(gr, x, y, getColorFor(status));
+	}
+
+	private Color getColorFor(final byte status) {
+		return Block.CELL_DYNAMIC == status ? model
+				.getActiveBlockColor() : Block.getColorForStaticValue(status);
 	}
 
 	private void drawCell(Graphics gr, int x, int y, Color colorFG) {
-		Dimension cellSize = getCellSize();		
+		Dimension cellSize = getCellSize();
 		gr.setColor(colorFG);
-		gr.fillRoundRect(x + 1, y + 1, cellSize.width - 1, cellSize.height -1 , 2 , 2);
+		gr.fillRoundRect(x + 1, y + 1, cellSize.width - 1, cellSize.height - 1,
+				2, 2);
 	}
 
 }
