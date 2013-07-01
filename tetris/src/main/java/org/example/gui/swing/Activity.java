@@ -12,4 +12,8 @@ public class Activity extends JPanel  {
 	public void onCreate( Bundle storedState ) {
 		// For compatibility
 	}
+	
+	public void keyPressed(KeyEvent keyEvent) {
+		// For compatibility		
+	}	
 }
