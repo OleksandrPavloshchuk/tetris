@@ -14,7 +14,7 @@ public class Block {
 
 	public enum BlockColor {
 		RED(0x990000, (byte) 2), GREEN(0x009900, (byte) 3), BLUE(0x000099,
-				(byte) 4), YELLOW(0xffcc33, (byte) 5), CYAN(0x339966, (byte) 6);
+				(byte) 4), YELLOW(0xffcc33, (byte) 5), CYAN(0x3399aa, (byte) 6);
 		private final Color color;
 		private final byte value;
 
@@ -31,11 +31,10 @@ public class Block {
 	private static Random random = new Random();
 
 	// current block state:
-	private final int shape;
+	private int shape = 0;
 	private int frame = 0;
-	private final BlockColor color;
-
 	private Point topLeft = new Point(Model.NUM_COLS >> 1, 0);
+	private BlockColor color;
 
 	public int getFrame() {
 		return frame;
@@ -45,15 +44,8 @@ public class Block {
 		return color.color;
 	}
 
-	public byte getStatusValue() {
+	public byte getStaticValue() {
 		return color.value;
-	}
-
-	public int getNextFrame(int frame) {
-		if (frame + 1 >= getFramesCount()) {
-			return 0;
-		}
-		return frame + 1;
 	}
 
 	public static Color getColorForStaticValue(byte b) {
@@ -70,41 +62,33 @@ public class Block {
 		this.topLeft = topLeft;
 	}
 
-	private final int getFramesCount() {
-		return getCurrentShape().frameCount;
+	public final int getFramesCount() {
+		return Shape.values()[shape].frameCount;
 	}
 
 	public final byte[][] getShape(int nFrame) {
-		return getCurrentShape().getFrame(nFrame).get();
+		return Shape.values()[shape].getFrame(nFrame).get();
+	}
+
+	public final int getShapeWidth(int nFrame) {
+		return Shape.values()[shape].getFrame(nFrame).width;
+	}
+
+	public final static synchronized Block createBlock() {
+		// generate random number:
+		int indexShape = random.nextInt(Shape.values().length);
+		BlockColor blockColor = BlockColor.values()[random.nextInt(BlockColor
+				.values().length)];
+		return new Block(indexShape, blockColor);
+	}
+
+	private Block(int nShape, BlockColor blockColor) {
+		shape = nShape;
+		this.color = blockColor;
 	}
 
 	public Point getTopLeft() {
 		return this.topLeft;
-	}
-
-	public final int getShapeWidth(int nFrame) {
-		return getCurrentShape().getFrame(nFrame).width;
-	}
-
-	public final static synchronized Block createBlock() {
-		return new Block(randomShapeIndex(), randomBlockColor());
-	}
-
-	private static int randomShapeIndex() {
-		return random.nextInt(Shape.values().length);
-	}
-
-	private static BlockColor randomBlockColor() {
-		return BlockColor.values()[random.nextInt(BlockColor.values().length)];
-	}
-
-	private final Shape getCurrentShape() {
-		return Shape.values()[shape];
-	}
-
-	private Block(int shape, BlockColor blockColor) {
-		this.shape = shape;
-		this.color = blockColor;
 	}
 
 	private enum Shape {
@@ -171,7 +155,7 @@ public class Block {
 				case 2:
 					return new Frame(3).add("111").add("100");
 				case 3:
-					return new Frame(2).add("11").add("01").add("01");
+					return new Frame(2).add("11").add("10").add("10");
 				}
 				throw new IllegalArgumentException("Invalid frame number: " + n);
 			}
