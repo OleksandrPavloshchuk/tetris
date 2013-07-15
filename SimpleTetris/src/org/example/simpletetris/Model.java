@@ -27,8 +27,11 @@ public class Model {
 	// scores counter:
 	private ScoresCounter counter = null;
 
-	public Model(ScoresCounter counter) {
+	public Model() {
 		field = new byte[NUM_ROWS][NUM_COLS];
+	}
+	
+	public void setCounter(ScoresCounter counter) {
 		this.counter = counter;
 	}
 

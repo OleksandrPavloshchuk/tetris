@@ -12,7 +12,7 @@ public class MainActivity extends Activity {
 	private TetrisView tetrisView = null;
 	private TextView scoresView = null;
 	private ScoresCounter scoresCounter = null;
-	private Model model = new Model(scoresCounter);
+	private Model model = new Model();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +21,7 @@ public class MainActivity extends Activity {
 		
 		tetrisView = TetrisView.class.cast(findViewById(R.id.tetris));
 		tetrisView.setActivity(this);
+		tetrisView.setModel(model);
 		tetrisView.setOnTouchListener( new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
@@ -48,8 +49,7 @@ public class MainActivity extends Activity {
 		
 		scoresView = TextView.class.cast( findViewById(R.id.scores));
 		scoresCounter = new ScoresCounter(scoresView);
-		// TODO: temporary!!!
-		scoresView.setText( "Scores: XXX Lines: XXX" );
+		model.setCounter(scoresCounter);
 	}
 	
 	private int getDirection(View v, MotionEvent event) {

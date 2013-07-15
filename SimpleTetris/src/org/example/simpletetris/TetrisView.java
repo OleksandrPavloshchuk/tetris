@@ -12,7 +12,7 @@ import android.view.View;
 
 public class TetrisView extends View {
 	
-	private static final int DELAY = 1000;
+	private static final int DELAY = 100;
 
 	private RedrawHandler redrawHandler = new RedrawHandler();
 
@@ -47,17 +47,11 @@ public class TetrisView extends View {
 	
 	
 	public void update() {
-		if( null==model  ) {
+		if( null==model || !model.isGameActive() ) {
 			return;
 		}
-		while (!model.isGameOver()) {
-			
-			if( model.isGameActive() ) {
-				redrawHandler.sleep(DELAY);
-				activity.doMove(Model.Move.DOWN);
-			}
-		}
-		
+		redrawHandler.sleep(DELAY);
+		activity.doMove(Model.Move.DOWN);
 	}
 
 	private void drawCell(Canvas canvas, int row, int col) {
@@ -86,6 +80,9 @@ public class TetrisView extends View {
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 		drawFrame(canvas);
+		if( null==model) {
+			return;
+		}
 		
 		// draw all the cells:
 		for (int i = 0; i < Model.NUM_ROWS; i++) {
@@ -120,7 +117,6 @@ public class TetrisView extends View {
 			if( !model.isGameActive() ) {
 				return;
 			}
-			activity.doMove(Model.Move.DOWN);
 			TetrisView.this.update();
 			TetrisView.this.invalidate();
 		}
