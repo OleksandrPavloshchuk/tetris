@@ -1,7 +1,5 @@
 package org.example.simpletetris;
 
-import java.util.Random;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -13,15 +11,10 @@ import android.util.AttributeSet;
 import android.view.View;
 
 public class TetrisView extends View {
+	
+	private static final int DELAY = 1000;
 
-	// TODO: temporary!!!!
-	private static final int _ROWS = 20;
-	private static final int _COLUMNS = 10;
-	private final int[][] _data = new int[_ROWS][_COLUMNS];
-	private static final int[] _COLORS = { Color.WHITE, 0xff008040, 0xff804000,
-			0xff000080, 0xff0080cc, 0xffcc0040, 0xffcccc00, Color.WHITE,
-			Color.WHITE, Color.WHITE, };
-	private RedrawHandler _redrawHandler = new RedrawHandler();
+	private RedrawHandler redrawHandler = new RedrawHandler();
 
 	private static final int BLOCK_OFFSET = 2;
 	private static final int FRAME_OFFSET = 10;
@@ -30,8 +23,9 @@ public class TetrisView extends View {
 
 	private int width;
 	private int height;
-	private int cellWidth;
-	private int cellHeight;
+	private Dimension cellSize = null;	
+	private Model model = null;
+	private MainActivity activity = null;
 
 	public TetrisView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -43,41 +37,70 @@ public class TetrisView extends View {
 		update();
 	}
 
-	private void update() {
-		Random random = new Random(System.currentTimeMillis());
-		for (int y = 0; y < _data.length; y++) {
-			for (int x = 0; x < _data[y].length; x++) {
-				int n = random.nextInt(_COLORS.length);
-				_data[y][x] = n;
+	public void setModel(Model model) {
+		this.model = model;
+	}
+	
+	public void setActivity(MainActivity activity) {
+		this.activity = activity;
+	}
+	
+	
+	public void update() {
+		if( null==model  ) {
+			return;
+		}
+		while (!model.isGameOver()) {
+			
+			if( model.isGameActive() ) {
+				redrawHandler.sleep(DELAY);
+				activity.doMove(Model.Move.DOWN);
 			}
 		}
-		_redrawHandler.sleep(2000);
+		
+	}
+
+	private void drawCell(Canvas canvas, int row, int col) {
+
+		byte nStatus = model.getCellStatus(row, col);
+		
+		if( Block.CELL_EMPTY!=nStatus ) {
+			int color = Block.CELL_DYNAMIC==nStatus ? model.getActiveBlockColor() :
+				Block.getColorForStaticValue(nStatus);
+			drawCell(canvas, col, row, color);
+		}
+	}
+
+	private void drawCell(Canvas canvas, int x, int y, int colorFG) {
+		paint.setColor(colorFG);
+		float top = FRAME_OFFSET + y * cellSize.getHeight() + BLOCK_OFFSET;
+		float left = FRAME_OFFSET + x * cellSize.getWidth() + BLOCK_OFFSET;
+		float bottom = FRAME_OFFSET + (y + 1) * cellSize.getHeight() - BLOCK_OFFSET;
+		float right = FRAME_OFFSET + (x + 1) * cellSize.getWidth() - BLOCK_OFFSET;
+		RectF rect = new RectF(left,top,right,bottom);
+		
+		canvas.drawRoundRect(rect, 4, 4 , paint );
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
+		drawFrame(canvas);
+		
+		// draw all the cells:
+		for (int i = 0; i < Model.NUM_ROWS; i++) {
+			for (int j = 0; j < Model.NUM_COLS; j++) {
+				drawCell(canvas, i, j);
+			}
+		}		
+	}
+
+	private void drawFrame(Canvas canvas) {
 		paint.setColor(Color.GRAY);
 		canvas.drawRect(0, 0, width, height, paint);
 		paint.setColor(Color.WHITE);
 		canvas.drawRect(FRAME_OFFSET, FRAME_OFFSET, width - FRAME_OFFSET,
 				height - FRAME_OFFSET, paint);
-
-		for (int y = 0; y < _data.length; y++) {
-			for (int x = 0; x < _data[y].length; x++) {
-				// Draw cell:
-				int color = _COLORS[_data[y][x]];
-				paint.setColor(color);
-				float left = FRAME_OFFSET + cellWidth * x + BLOCK_OFFSET;
-				float top = FRAME_OFFSET + cellHeight * y + BLOCK_OFFSET;
-				float right = FRAME_OFFSET + cellWidth * (x + 1) - BLOCK_OFFSET;
-				float bottom = FRAME_OFFSET + cellHeight * (y + 1)
-						- BLOCK_OFFSET;
-				RectF rect = new RectF(left, top, right, bottom);
-				canvas.drawRoundRect(rect, 4, 4, paint);
-			}
-		}
-
 	}
 
 	@Override
@@ -85,14 +108,19 @@ public class TetrisView extends View {
 		super.onSizeChanged(w, h, oldw, oldh);
 		width = w;
 		height = h;
-		cellWidth = (width - 2 * FRAME_OFFSET) / _COLUMNS;
-		cellHeight = (height - 2 * FRAME_OFFSET) / _ROWS;
+		int cellWidth = (width - 2 * FRAME_OFFSET) / Model.NUM_COLS;
+		int cellHeight = (height - 2 * FRAME_OFFSET) / Model.NUM_ROWS;
+		this.cellSize = new Dimension(cellWidth, cellHeight);
 	}
 	
 	private class RedrawHandler extends Handler {
 
 		@Override
 		public void handleMessage(Message msg) {
+			if( !model.isGameActive() ) {
+				return;
+			}
+			activity.doMove(Model.Move.DOWN);
 			TetrisView.this.update();
 			TetrisView.this.invalidate();
 		}

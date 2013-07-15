@@ -4,11 +4,15 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
 	
-	private TetrisView tetrisView;
+	private TetrisView tetrisView = null;
+	private TextView scoresView = null;
+	private ScoresCounter scoresCounter = null;
+	private Model model = new Model(scoresCounter);
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -16,17 +20,36 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		
 		tetrisView = TetrisView.class.cast(findViewById(R.id.tetris));
-		
+		tetrisView.setActivity(this);
 		tetrisView.setOnTouchListener( new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
+				// TODO ???
+				startNewGame();
+				
 				int direction = getDirection(v, event);
-				String text = String.format("Direction: %d", direction );
-				Toast toast = Toast.makeText( getApplicationContext(), text, Toast.LENGTH_SHORT );
-				toast.show();
+				switch( direction ) {
+				case 0: // left
+					doMove(Model.Move.LEFT); 					
+					break;
+				case 1: // rotate
+					doMove(Model.Move.ROTATE);
+					break;
+				case 2: // down
+					doMove(Model.Move.DOWN); 					
+					break;
+				case 3: // right
+					doMove(Model.Move.RIGHT); 					
+					break;
+				}
 				return true;
 			}
 		});
+		
+		scoresView = TextView.class.cast( findViewById(R.id.scores));
+		scoresCounter = new ScoresCounter(scoresView);
+		// TODO: temporary!!!
+		scoresView.setText( "Scores: XXX Lines: XXX" );
 	}
 	
 	private int getDirection(View v, MotionEvent event) {
@@ -43,4 +66,26 @@ public class MainActivity extends Activity {
         
         return direction;
 	}
+	
+	public void doMove(Model.Move move) {
+		model.generateNewField(move);
+		if (model.isGameActive()) {
+			tetrisView.invalidate();
+			scoresView.invalidate();
+		} else if (model.isGameOver()) {
+			Toast toast = Toast.makeText( getApplicationContext(), "GAME OVER!", 
+					Toast.LENGTH_SHORT );
+			toast.show();
+			scoresCounter.reset();
+
+		}
+	}
+	
+	public final void startNewGame() {
+		if (!model.isGameActive()) {
+			model.gameStart();
+		}
+	}
+
+	
 }
