@@ -10,9 +10,9 @@ import android.os.Message;
 import android.util.AttributeSet;
 import android.view.View;
 
-public class TetrisView extends View {
+public class TetrisView extends View {		
 	
-	private static final int DELAY = 100;
+	private static final int DELAY = 400;
 
 	private RedrawHandler redrawHandler = new RedrawHandler();
 
@@ -25,33 +25,33 @@ public class TetrisView extends View {
 	private int height;
 	private Dimension cellSize = null;	
 	private Model model = null;
-	private MainActivity activity = null;
+	private long lastMove = 0;
 
 	public TetrisView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		update();
 	}
 
 	public TetrisView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		update();
 	}
 
 	public void setModel(Model model) {
 		this.model = model;
 	}
 	
-	public void setActivity(MainActivity activity) {
-		this.activity = activity;
-	}
 	
-	
-	public void update() {
+	public void update( Model.Move move ) {
 		if( null==model || !model.isGameActive() ) {
 			return;
 		}
+        long now = System.currentTimeMillis();
+
+        if (now - lastMove > DELAY) {
+        	model.generateNewField(move);
+    		invalidate();
+            lastMove = now;
+        }
 		redrawHandler.sleep(DELAY);
-		activity.doMove(Model.Move.DOWN);
 	}
 
 	private void drawCell(Canvas canvas, int row, int col) {
@@ -110,15 +110,11 @@ public class TetrisView extends View {
 		this.cellSize = new Dimension(cellWidth, cellHeight);
 	}
 	
-	private class RedrawHandler extends Handler {
+	class RedrawHandler extends Handler {
 
 		@Override
 		public void handleMessage(Message msg) {
-			if( !model.isGameActive() ) {
-				return;
-			}
-			TetrisView.this.update();
-			TetrisView.this.invalidate();
+			TetrisView.this.update( Model.Move.DOWN);
 		}
 
 		public void sleep(long delayMillis) {
