@@ -1,11 +1,5 @@
-/**
- * Block.java   single Tetris block description
- */
+package org.example.simpletetris;
 
-package org.example.tetris;
-
-import java.awt.Color;
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -13,13 +7,14 @@ import java.util.Random;
 public class Block {
 
 	public enum BlockColor {
-		RED(0x990000, (byte) 2), GREEN(0x009900, (byte) 3), BLUE(0x000099,
-				(byte) 4), YELLOW(0xffcc33, (byte) 5), CYAN(0x3399aa, (byte) 6);
-		private final Color color;
+		RED(0xff990000, (byte) 2), GREEN(0xff009900, (byte) 3), BLUE(
+				0xff000099, (byte) 4), YELLOW(0xffffcc33, (byte) 5), CYAN(
+				0xff3399aa, (byte) 6);
+		private final int color;
 		private final byte value;
 
 		private BlockColor(int color, byte value) {
-			this.color = new Color(color);
+			this.color = color;
 			this.value = value;
 		}
 	}
@@ -40,7 +35,7 @@ public class Block {
 		return frame;
 	}
 
-	public Color getColor() {
+	public int getColor() {
 		return color.color;
 	}
 
@@ -48,13 +43,13 @@ public class Block {
 		return color.value;
 	}
 
-	public static Color getColorForStaticValue(byte b) {
+	public static int getColorForStaticValue(byte b) {
 		for (BlockColor item : BlockColor.values()) {
 			if (b == item.value) {
 				return item.color;
 			}
 		}
-		return null;
+		return -1; // color is not found
 	}
 
 	public final void setState(int frame, Point topLeft) {

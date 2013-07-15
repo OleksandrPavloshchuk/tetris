@@ -131,6 +131,7 @@ public class Main extends Activity {
 			repaint();
 		} else if (model.isGameOver()) {
 			JOptionPane.showMessageDialog(this, "GAME OVER!");
+			counter.reset();
 
 			// TODO: show "game over" message
 			ticker = null;

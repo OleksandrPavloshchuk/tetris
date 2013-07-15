@@ -1,10 +1,5 @@
-/**
- * Model.java   algorithmes of Tetris separated from visual presentation
- */
-package org.example.tetris;
 
-import java.awt.Color;
-import java.awt.Point;
+package org.example.simpletetris;
 
 public class Model {
 
@@ -32,8 +27,11 @@ public class Model {
 	// scores counter:
 	private ScoresCounter counter = null;
 
-	public Model(ScoresCounter counter) {
+	public Model() {
 		field = new byte[NUM_ROWS][NUM_COLS];
+	}
+	
+	public void setCounter(ScoresCounter counter) {
 		this.counter = counter;
 	}
 
@@ -101,13 +99,13 @@ public class Model {
 		// count new parameters:
 		switch (move) {
 		case LEFT:
-			newTopLeft.x--;
+			newTopLeft.setX(newTopLeft.getX() - 1);
 			break;
 		case RIGHT:
-			newTopLeft.x++;
+			newTopLeft.setX(newTopLeft.getX() + 1);
 			break;
 		case DOWN:
-			newTopLeft.y++;
+			newTopLeft.setY(newTopLeft.getY() + 1);
 			break;
 		case ROTATE:
 			nFrame++;
@@ -162,24 +160,24 @@ public class Model {
 		synchronized (field) {
 			byte[][] shape = activeBlock.getShape(nFrame);
 
-			if (newTopLeft.y < 0) {
+			if (newTopLeft.getY() < 0) {
 				return false;
 			}
-			if (newTopLeft.x < 0) {
+			if (newTopLeft.getX() < 0) {
 				return false;
 			}
-			if (newTopLeft.y + shape.length > NUM_ROWS) {
+			if (newTopLeft.getY() + shape.length > NUM_ROWS) {
 				return false;
 			}
-			if (newTopLeft.x + shape[0].length > NUM_COLS) {
+			if (newTopLeft.getX() + shape[0].length > NUM_COLS) {
 				return false;
 			}
 
 			// Check all the items in field:
 			for (int i = 0; i < shape.length; i++) {
 				for (int j = 0; j < shape[i].length; j++) {
-					int y = newTopLeft.y + i;
-					int x = newTopLeft.x + j;
+					int y = newTopLeft.getY() + i;
+					int x = newTopLeft.getX() + j;
 					if( Block.CELL_EMPTY!=shape[i][j] && Block.CELL_EMPTY!=field[y][x]) {
 						return false;
 					}
@@ -189,8 +187,8 @@ public class Model {
 			// All cell is correct - add the data:
 			for (int i = 0; i < shape.length; i++) {
 				for (int j = 0; j < shape[i].length; j++) {
-					int y = newTopLeft.y + i;
-					int x = newTopLeft.x + j;
+					int y = newTopLeft.getY() + i;
+					int x = newTopLeft.getX() + j;
 					if( Block.CELL_EMPTY!=shape[i][j]) {
 						field[y][x] = shape[i][j];
 					}
@@ -258,7 +256,8 @@ public class Model {
 		}
 	}
 
-	public Color getActiveBlockColor() {
+	public int getActiveBlockColor() {
 		return activeBlock.getColor();
 	}
+	
 }
