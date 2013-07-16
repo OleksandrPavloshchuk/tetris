@@ -1,6 +1,8 @@
 
 package org.example.simpletetris;
 
+import android.os.Bundle;
+
 public class Model {
 
 	public enum Move {
@@ -10,6 +12,9 @@ public class Model {
 	public enum GameStatus {
 		READY, ACTIVE, SUSPENDED, OVER
 	}
+	
+	private static final String TAG_DATA = "data";
+	private static final String TAG_ACTIVE_BLOCK = "active-block";
 
 	// some constants in the model:
 	public static final int NUM_COLS = 10; // number of columns in field
@@ -262,6 +267,37 @@ public class Model {
 
 	public int getActiveBlockColor() {
 		return activeBlock.getColor();
+	}
+
+	public void storeTo(Bundle bundle) {
+		bundle.putSerializable(TAG_ACTIVE_BLOCK, activeBlock);
+		bundle.putIntArray(TAG_DATA, getIntArrayFromData());
+	}
+
+	public void restoreFrom(Bundle bundle) {
+		activeBlock = Block.class.cast( bundle.getSerializable(TAG_ACTIVE_BLOCK));
+		restoreDataFromIntArray( bundle.getIntArray(TAG_DATA));
+	}
+	
+	private void restoreDataFromIntArray(int[] src) {
+		if( null==src ) {
+			return;
+		}
+		for( int k=0; k<src.length; k++ ) {
+			int i = k / NUM_COLS;
+			int j = k % NUM_COLS;
+			field[i][j] = (byte) src[k];
+		}
+	}
+
+	private int[] getIntArrayFromData() {
+		int[] result = new int[ NUM_COLS * NUM_ROWS ];
+		for( int i=0; i<NUM_ROWS; i++ ) {
+			for( int j=0; j<NUM_COLS; j++ ) {
+				result[ NUM_COLS * i + j ] = field[i][j];
+			}
+		}
+		return result;
 	}
 	
 }

@@ -8,13 +8,14 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
+	private static final String ICICLE_TAG = "simple-tetris";
+
 	private TetrisView tetrisView = null;
 	private TextView scoresView = null;
 	private ScoresCounter scoresCounter = null;
 	private Model model = new Model();
 
-	private TextView startView = null;
-	private TextView overView = null;
+	private TextView messageView = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -60,12 +61,15 @@ public class MainActivity extends Activity {
 		scoresCounter = new ScoresCounter(scoresView);
 		model.setCounter(scoresCounter);
 
-		startView = TextView.class.cast(findViewById(R.id.start));
-		startView.setText(getApplicationContext()
-				.getString(R.string.mode_ready));
+		messageView = TextView.class.cast(findViewById(R.id.message));
 
-		overView = TextView.class.cast(findViewById(R.id.over));
-		overView.setText(getApplicationContext().getString(R.string.mode_over));
+		// Restore the state:
+		if (null != savedInstanceState) {
+			onRestoreInstanceState(savedInstanceState);
+		} else {
+			messageView.setText(getApplicationContext().getString(
+					R.string.mode_ready));
+		}
 
 	}
 
@@ -93,8 +97,7 @@ public class MainActivity extends Activity {
 
 	public final void startNewGame() {
 		if (!model.isGameActive()) {
-			overView.setVisibility(View.INVISIBLE);
-			startView.setVisibility(View.INVISIBLE);
+			messageView.setVisibility(View.INVISIBLE);
 			scoresCounter.reset();
 			model.gameStart();
 			tetrisView.update(Model.Move.DOWN);
@@ -102,7 +105,43 @@ public class MainActivity extends Activity {
 	}
 
 	public void endGame() {
-		overView.setVisibility(View.VISIBLE);
+		messageView.setVisibility(View.VISIBLE);
+		messageView
+				.setText(getApplicationContext().getText(R.string.mode_over));
+	}
+
+	public void pauseGame() {
+		model.setGamePaused();
+		messageView.setVisibility(View.VISIBLE);
+		messageView.setText(getApplicationContext()
+				.getText(R.string.mode_pause));
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		pauseGame();
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		Bundle bundle = new Bundle();
+		model.storeTo(bundle);
+		scoresCounter.storeTo(bundle);
+		outState.putBundle(ICICLE_TAG, bundle);
+	}
+
+	@Override
+	protected void onRestoreInstanceState(Bundle inState) {
+		super.onSaveInstanceState(inState);
+		Bundle bundle = inState.getBundle(ICICLE_TAG);
+		if (null != bundle) {
+			model.restoreFrom(bundle);
+			scoresCounter.restoreFrom(bundle);
+		}
+		pauseGame();
+
 	}
 
 }

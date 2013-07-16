@@ -4,9 +4,13 @@
 
 package org.example.simpletetris;
 
+import android.os.Bundle;
 import android.widget.TextView;
 
 public class ScoresCounter {
+	private static final String TAG_SCORES = "scores";
+	private static final String TAG_LINES = "lines";
+	
 	private int scores = 0;
 	private int lines = 0;
 	private int scoreDelta = 4;
@@ -44,5 +48,15 @@ public class ScoresCounter {
 
 	private void updateStatus() {
 		status.setText( String.format( "Lines: %d Scores: %d", lines, scores));
+	}
+
+	public void storeTo(Bundle bundle) {
+		bundle.putInt(TAG_LINES, lines);
+		bundle.putInt(TAG_SCORES, scores);
+	}
+
+	public void restoreFrom(Bundle bundle) {
+		this.lines = bundle.getInt(TAG_LINES);
+		this.scores = bundle.getInt(TAG_SCORES);
 	}	
 }

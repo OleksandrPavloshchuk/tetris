@@ -1,10 +1,12 @@
 package org.example.simpletetris;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class Block {
+public class Block implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	public enum BlockColor {
 		RED(0xff990000, (byte) 2), GREEN(0xff009900, (byte) 3), BLUE(
