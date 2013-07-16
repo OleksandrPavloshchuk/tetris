@@ -8,7 +8,7 @@ public class Model {
 	}
 
 	public enum GameStatus {
-		EMPTY, ACTIVE, SUSPENDED, OVER
+		READY, ACTIVE, SUSPENDED, OVER
 	}
 
 	// some constants in the model:
@@ -16,7 +16,7 @@ public class Model {
 	public static final int NUM_ROWS = 20; // number of rows in field
 
 	// game status constants:
-	private GameStatus gameStatus = GameStatus.EMPTY;
+	private GameStatus gameStatus = GameStatus.READY;
 
 	// array of cell values:
 	private byte[][] field = null;
@@ -42,6 +42,10 @@ public class Model {
 	public boolean isGameOver() {
 		return GameStatus.OVER.equals(gameStatus);
 	}
+	
+	public boolean isGameReady() {
+		return GameStatus.READY.equals(gameStatus);
+	}	
 
 	public void reset() {
 		reset(false); // call the inner method - reset the all data
@@ -66,6 +70,7 @@ public class Model {
 		}
 		setGameActive();
 		activeBlock = Block.createBlock();
+		
 	}
 
 	public void setGameActive() {
@@ -124,14 +129,13 @@ public class Model {
 				counter.addScores();
 
 				if (!newBlock()) {
+					// Game is over
 					setGameStatus(GameStatus.OVER);
 					activeBlock = null;
 					reset(false);
-					return;
 				}
 			}
 
-			return;
 		} else {
 			// Make the new move:
 			activeBlock.setState(nFrame, newTopLeft);

@@ -10,8 +10,8 @@ import android.os.Message;
 import android.util.AttributeSet;
 import android.view.View;
 
-public class TetrisView extends View {		
-	
+public class TetrisView extends View {
+
 	private static final int DELAY = 400;
 
 	private RedrawHandler redrawHandler = new RedrawHandler();
@@ -23,9 +23,11 @@ public class TetrisView extends View {
 
 	private int width;
 	private int height;
-	private Dimension cellSize = null;	
+	private Dimension cellSize = null;
 	private Model model = null;
 	private long lastMove = 0;
+	
+	private MainActivity activity;
 
 	public TetrisView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -39,28 +41,33 @@ public class TetrisView extends View {
 		this.model = model;
 	}
 	
+	public void setActivity(MainActivity activity) {
+		this.activity = activity;
+	}
 	
-	public void update( Model.Move move ) {
-		if( null==model || !model.isGameActive() ) {
+
+	public void update(Model.Move move) {
+		if (null == model || !model.isGameActive()) {
 			return;
 		}
-        long now = System.currentTimeMillis();
+		long now = System.currentTimeMillis();
 
-        if (now - lastMove > DELAY) {
-        	model.generateNewField(move);
-    		invalidate();
-            lastMove = now;
-        }
-		redrawHandler.sleep(DELAY);
+		if (now - lastMove > DELAY) {
+			model.generateNewField(move);
+			invalidate();
+			lastMove = now;
+		}
+		redrawHandler.sleep(DELAY);		
 	}
 
 	private void drawCell(Canvas canvas, int row, int col) {
 
 		byte nStatus = model.getCellStatus(row, col);
-		
-		if( Block.CELL_EMPTY!=nStatus ) {
-			int color = Block.CELL_DYNAMIC==nStatus ? model.getActiveBlockColor() :
-				Block.getColorForStaticValue(nStatus);
+
+		if (Block.CELL_EMPTY != nStatus) {
+			int color = Block.CELL_DYNAMIC == nStatus ? model
+					.getActiveBlockColor() : Block
+					.getColorForStaticValue(nStatus);
 			drawCell(canvas, col, row, color);
 		}
 	}
@@ -69,27 +76,29 @@ public class TetrisView extends View {
 		paint.setColor(colorFG);
 		float top = FRAME_OFFSET + y * cellSize.getHeight() + BLOCK_OFFSET;
 		float left = FRAME_OFFSET + x * cellSize.getWidth() + BLOCK_OFFSET;
-		float bottom = FRAME_OFFSET + (y + 1) * cellSize.getHeight() - BLOCK_OFFSET;
-		float right = FRAME_OFFSET + (x + 1) * cellSize.getWidth() - BLOCK_OFFSET;
-		RectF rect = new RectF(left,top,right,bottom);
-		
-		canvas.drawRoundRect(rect, 4, 4 , paint );
+		float bottom = FRAME_OFFSET + (y + 1) * cellSize.getHeight()
+				- BLOCK_OFFSET;
+		float right = FRAME_OFFSET + (x + 1) * cellSize.getWidth()
+				- BLOCK_OFFSET;
+		RectF rect = new RectF(left, top, right, bottom);
+
+		canvas.drawRoundRect(rect, 4, 4, paint);
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 		drawFrame(canvas);
-		if( null==model) {
+		if (null == model) {
 			return;
 		}
-		
+
 		// draw all the cells:
 		for (int i = 0; i < Model.NUM_ROWS; i++) {
 			for (int j = 0; j < Model.NUM_COLS; j++) {
 				drawCell(canvas, i, j);
 			}
-		}		
+		}
 	}
 
 	private void drawFrame(Canvas canvas) {
@@ -109,12 +118,18 @@ public class TetrisView extends View {
 		int cellHeight = (height - 2 * FRAME_OFFSET) / Model.NUM_ROWS;
 		this.cellSize = new Dimension(cellWidth, cellHeight);
 	}
-	
+
 	class RedrawHandler extends Handler {
 
 		@Override
 		public void handleMessage(Message msg) {
-			TetrisView.this.update( Model.Move.DOWN);
+			if( model.isGamePaused() ) {
+				// TODO: switch to the pause mode
+			} else if ( model.isGameOver() ) {
+				activity.endGame();
+				return;
+			}
+			TetrisView.this.update(Model.Move.DOWN);
 		}
 
 		public void sleep(long delayMillis) {

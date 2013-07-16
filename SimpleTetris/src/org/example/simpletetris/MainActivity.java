@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
@@ -14,6 +13,9 @@ public class MainActivity extends Activity {
 	private ScoresCounter scoresCounter = null;
 	private Model model = new Model();
 
+	private TextView startView = null;
+	private TextView overView = null;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -21,51 +23,64 @@ public class MainActivity extends Activity {
 
 		tetrisView = TetrisView.class.cast(findViewById(R.id.tetris));
 		tetrisView.setModel(model);
+		tetrisView.setActivity(this);
 		tetrisView.setOnTouchListener(new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
-				if (!model.isGameActive()) {
+				if (model.isGameOver() || model.isGameReady()) {
 					startNewGame();
 					return false;
-				}
+				} else if (model.isGameActive()) {
 
-				int direction = getDirection(v, event);
-				switch (direction) {
-				case 0: // left
-					doMove(Model.Move.LEFT);
-					break;
-				case 1: // rotate
-					doMove(Model.Move.ROTATE);
-					break;
-				case 2: // down
-					doMove(Model.Move.DOWN);
-					break;
-				case 3: // right
-					doMove(Model.Move.RIGHT);
-					break;
-				}
+					int direction = getDirection(v, event);
+					switch (direction) {
+					case 0: // left
+						doMove(Model.Move.LEFT);
+						break;
+					case 1: // rotate
+						doMove(Model.Move.ROTATE);
+						break;
+					case 2: // down
+						doMove(Model.Move.DOWN);
+						break;
+					case 3: // right
+						doMove(Model.Move.RIGHT);
+						break;
+					}
 
-				return true;
+					return true;
+				} else {
+					// Paused state
+					return true;
+				}
 			}
 		});
 
 		scoresView = TextView.class.cast(findViewById(R.id.scores));
 		scoresCounter = new ScoresCounter(scoresView);
 		model.setCounter(scoresCounter);
+
+		startView = TextView.class.cast(findViewById(R.id.start));
+		startView.setText(getApplicationContext()
+				.getString(R.string.mode_ready));
+
+		overView = TextView.class.cast(findViewById(R.id.over));
+		overView.setText(getApplicationContext().getString(R.string.mode_over));
+
 	}
 
 	private int getDirection(View v, MotionEvent event) {
 		// Normalize x,y between 0 and 1
+
 		float x = event.getX() / v.getWidth();
 		float y = event.getY() / v.getHeight();
 
-		// Direction will be [0,1,2,3] depending on quadrant
-		int direction = 0;
-		direction = (x > y) ? 1 : 0;
-		direction |= (x > 1 - y) ? 2 : 0;
-
-		// 0 - left, 1 - rotate, 2 - down, 3 - right
-
+		int direction;
+		if (y > x) {
+			direction = (x > 1 - y) ? 2 : 0;
+		} else {
+			direction = (x > 1 - y) ? 3 : 1;
+		}
 		return direction;
 	}
 
@@ -73,19 +88,21 @@ public class MainActivity extends Activity {
 		if (model.isGameActive()) {
 			tetrisView.update(move);
 			scoresView.invalidate();
-			if (model.isGameOver()) {
-				Toast toast = Toast.makeText(getApplicationContext(),
-						"GAME OVER!", Toast.LENGTH_SHORT);
-				toast.show();
-				scoresCounter.reset();
-			}
 		}
 	}
 
 	public final void startNewGame() {
 		if (!model.isGameActive()) {
+			overView.setVisibility(View.INVISIBLE);
+			startView.setVisibility(View.INVISIBLE);
+			scoresCounter.reset();
 			model.gameStart();
+			tetrisView.update(Model.Move.DOWN);
 		}
+	}
+
+	public void endGame() {
+		overView.setVisibility(View.VISIBLE);
 	}
 
 }
