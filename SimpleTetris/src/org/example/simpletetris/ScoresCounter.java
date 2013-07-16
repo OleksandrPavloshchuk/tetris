@@ -47,7 +47,7 @@ public class ScoresCounter {
 	
 
 	private void updateStatus() {
-		status.setText( String.format( "Lines: %d Scores: %d", lines, scores));
+		status.setText( String.format( " Lines: %d Scores: %d", lines, scores));
 	}
 
 	public void storeTo(Bundle bundle) {

@@ -1,6 +1,8 @@
 package org.example.simpletetris;
 
 import android.app.Activity;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
@@ -9,13 +11,19 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 
 	private static final String ICICLE_TAG = "simple-tetris";
+	private static final String DATABASE_NAME = "simple-tetris";
 
 	private TetrisView tetrisView = null;
 	private TextView scoresView = null;
+	private TextView highScoresView = null;
 	private ScoresCounter scoresCounter = null;
 	private Model model = new Model();
 
 	private TextView messageView = null;
+	
+	// TODO: use some object here (2013/07/16)
+	private int highLines = 0;
+	private int highScores = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +68,9 @@ public class MainActivity extends Activity {
 		scoresView = TextView.class.cast(findViewById(R.id.scores));
 		scoresCounter = new ScoresCounter(scoresView);
 		model.setCounter(scoresCounter);
+		highScoresView = TextView.class.cast(findViewById(R.id.high_scores));
+		
+		loadHighScoresAndLines();
 
 		messageView = TextView.class.cast(findViewById(R.id.message));
 
@@ -106,6 +117,7 @@ public class MainActivity extends Activity {
 
 	public void endGame() {
 		messageView.setVisibility(View.VISIBLE);
+		storeHighScoresAndLines();
 		messageView
 				.setText(getApplicationContext().getText(R.string.mode_over));
 	}
@@ -143,5 +155,58 @@ public class MainActivity extends Activity {
 		pauseGame();
 
 	}
+	
+	private void loadHighScoresAndLines() {
+		SQLiteDatabase db = getApplicationContext()
+				.openOrCreateDatabase(DATABASE_NAME, MODE_PRIVATE , null );
+		// TODO: find a better solution for table existence checking (2013/07/16)
+		try {
+			db.execSQL("CREATE TABLE tetris ( lines integer, scores integer)");
+		} catch( Exception ex ) {
+			ex.printStackTrace();
+		}
+		// Try to select the data:
+		Cursor cursor = db.rawQuery("SELECT lines, scores FROM tetris", new String[]{} );
+		if( null==cursor || 0==cursor.getCount() ) {
+			// Create the new data
+			db.beginTransaction();
+			db.execSQL( "INSERT INTO tetris(lines,scores) VALUES( 0, 0 )" );
+			db.endTransaction();
+		} else {
+			while( !cursor.isLast() ) {
+				highLines = cursor.getInt(0);
+				highScores = cursor.getInt(1);
+			}
+		}
+		db.close();
+		
+		highScoresView.setText( String.format( " High Lines: %d High Scores: %d", highLines, highScores) );
+	}
+	
+	private void storeHighScoresAndLines() {
+		int lines = scoresCounter.getLines();
+		int scores = scoresCounter.getScores();
+		
+		// TODO: show the record message
+		boolean isRecord = false;
+		if( lines > highLines ) {
+			highLines = lines;
+			isRecord = true;
+		}
+		if( scores > highScores ) {
+			highScores = scores;
+			isRecord = true;
+		}
+		
+		SQLiteDatabase db = getApplicationContext()
+				.openOrCreateDatabase(DATABASE_NAME, MODE_PRIVATE , null );
+		db.beginTransaction();
+		
+		db.execSQL( "UPDATE tetris SET lines = " + highLines + ", scores = " + highScores );
+		db.endTransaction();
+		db.close();
+	}	
+
+	
 
 }
