@@ -16,9 +16,11 @@ public class ScoresCounter {
 	private int scoreDelta = 4;
 	
 	private final TextView status;
+	private final String format;
 	
-	public ScoresCounter( TextView status ) {
+	public ScoresCounter( TextView status, String format ) {
 		this.status = status;
+		this.format = format;
 	}
 
 	public void reset() {
@@ -47,7 +49,7 @@ public class ScoresCounter {
 	
 
 	private void updateStatus() {
-		status.setText( String.format( " Lines: %d Scores: %d", lines, scores));
+		status.setText( String.format( format, lines, scores));
 	}
 
 	public void storeTo(Bundle bundle) {

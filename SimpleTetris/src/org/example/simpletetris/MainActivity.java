@@ -50,7 +50,8 @@ public class MainActivity extends Activity {
 					case 1: // rotate
 						doMove(Model.Move.ROTATE);
 						break;
-					case 2: // down
+					case 2: // move down twice
+						doMove(Model.Move.DOWN);
 						doMove(Model.Move.DOWN);
 						break;
 					case 3: // right
@@ -67,7 +68,8 @@ public class MainActivity extends Activity {
 		});
 
 		scoresView = TextView.class.cast(findViewById(R.id.scores));
-		scoresCounter = new ScoresCounter(scoresView);
+		scoresCounter = new ScoresCounter(scoresView,
+			getString( R.string.scores_format));
 		model.setCounter(scoresCounter);
 		highScoresView = TextView.class.cast(findViewById(R.id.high_scores));
 
@@ -167,23 +169,23 @@ public class MainActivity extends Activity {
 	}
 
 	private void updateHighScoresView() {
-		highScoresView.setText(String.format(" High Lines: %d High Scores: %d",
-				highLines, highScores));
+		highScoresView.setText(String.format(
+				getString(R.string.high_scores_format), highLines, highScores));
 	}
 
 	private void storeHighScoresAndLines() {
-		if( highScores<scoresCounter.getScores() ) {
+		if (highScores < scoresCounter.getScores()) {
 			highScores = scoresCounter.getScores();
 		}
-		if( highLines<scoresCounter.getLines() ) {
+		if (highLines < scoresCounter.getLines()) {
 			highLines = scoresCounter.getLines();
 		}
-		
+
 		SharedPreferences prefs = getPreferences(MODE_PRIVATE);
 		SharedPreferences.Editor editor = prefs.edit();
 		editor.putInt(PREFS_HIGH_LINES, highLines);
 		editor.putInt(PREFS_HIGH_SCORES, highScores);
-		
+
 		editor.commit();
 		updateHighScoresView();
 	}
