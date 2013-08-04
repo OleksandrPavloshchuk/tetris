@@ -1,8 +1,7 @@
 package org.example.simpletetris;
 
 import android.app.Activity;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
@@ -11,7 +10,9 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 
 	private static final String ICICLE_TAG = "simple-tetris";
-	private static final String DATABASE_NAME = "simple-tetris";
+
+	private static final String PREFS_HIGH_LINES = "high_lines";
+	private static final String PREFS_HIGH_SCORES = "high_scores";
 
 	private TetrisView tetrisView = null;
 	private TextView scoresView = null;
@@ -20,7 +21,7 @@ public class MainActivity extends Activity {
 	private Model model = new Model();
 
 	private TextView messageView = null;
-	
+
 	// TODO: use some object here (2013/07/16)
 	private int highLines = 0;
 	private int highScores = 0;
@@ -69,7 +70,7 @@ public class MainActivity extends Activity {
 		scoresCounter = new ScoresCounter(scoresView);
 		model.setCounter(scoresCounter);
 		highScoresView = TextView.class.cast(findViewById(R.id.high_scores));
-		
+
 		loadHighScoresAndLines();
 
 		messageView = TextView.class.cast(findViewById(R.id.message));
@@ -120,6 +121,7 @@ public class MainActivity extends Activity {
 		storeHighScoresAndLines();
 		messageView
 				.setText(getApplicationContext().getText(R.string.mode_over));
+		storeHighScoresAndLines();
 	}
 
 	public void pauseGame() {
@@ -127,6 +129,7 @@ public class MainActivity extends Activity {
 		messageView.setVisibility(View.VISIBLE);
 		messageView.setText(getApplicationContext()
 				.getText(R.string.mode_pause));
+		storeHighScoresAndLines();
 	}
 
 	@Override
@@ -155,58 +158,34 @@ public class MainActivity extends Activity {
 		pauseGame();
 
 	}
-	
-	private void loadHighScoresAndLines() {
-		SQLiteDatabase db = getApplicationContext()
-				.openOrCreateDatabase(DATABASE_NAME, MODE_PRIVATE , null );
-		// TODO: find a better solution for table existence checking (2013/07/16)
-		try {
-			db.execSQL("CREATE TABLE tetris ( lines integer, scores integer)");
-		} catch( Exception ex ) {
-			ex.printStackTrace();
-		}
-		// Try to select the data:
-		Cursor cursor = db.rawQuery("SELECT lines, scores FROM tetris", new String[]{} );
-		if( null==cursor || 0==cursor.getCount() ) {
-			// Create the new data
-			db.beginTransaction();
-			db.execSQL( "INSERT INTO tetris(lines,scores) VALUES( 0, 0 )" );
-			db.endTransaction();
-		} else {
-			while( !cursor.isLast() ) {
-				highLines = cursor.getInt(0);
-				highScores = cursor.getInt(1);
-			}
-		}
-		db.close();
-		
-		highScoresView.setText( String.format( " High Lines: %d High Scores: %d", highLines, highScores) );
-	}
-	
-	private void storeHighScoresAndLines() {
-		int lines = scoresCounter.getLines();
-		int scores = scoresCounter.getScores();
-		
-		// TODO: show the record message
-		boolean isRecord = false;
-		if( lines > highLines ) {
-			highLines = lines;
-			isRecord = true;
-		}
-		if( scores > highScores ) {
-			highScores = scores;
-			isRecord = true;
-		}
-		
-		SQLiteDatabase db = getApplicationContext()
-				.openOrCreateDatabase(DATABASE_NAME, MODE_PRIVATE , null );
-		db.beginTransaction();
-		
-		db.execSQL( "UPDATE tetris SET lines = " + highLines + ", scores = " + highScores );
-		db.endTransaction();
-		db.close();
-	}	
 
-	
+	private void loadHighScoresAndLines() {
+		SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+		highLines = prefs.getInt(PREFS_HIGH_LINES, 0);
+		highScores = prefs.getInt(PREFS_HIGH_SCORES, 0);
+		updateHighScoresView();
+	}
+
+	private void updateHighScoresView() {
+		highScoresView.setText(String.format(" High Lines: %d High Scores: %d",
+				highLines, highScores));
+	}
+
+	private void storeHighScoresAndLines() {
+		if( highScores<scoresCounter.getScores() ) {
+			highScores = scoresCounter.getScores();
+		}
+		if( highLines<scoresCounter.getLines() ) {
+			highLines = scoresCounter.getLines();
+		}
+		
+		SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putInt(PREFS_HIGH_LINES, highLines);
+		editor.putInt(PREFS_HIGH_SCORES, highScores);
+		
+		editor.commit();
+		updateHighScoresView();
+	}
 
 }
