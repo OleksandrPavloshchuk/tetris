@@ -29,6 +29,37 @@ public class MainActivity extends Activity {
 	private int highLines = 0;
 	private int highScores = 0;
 
+	private final View.OnTouchListener onTouchListener = new View.OnTouchListener() {
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			if (model.isGameOver() || model.isGameBeforeStart()) {
+				startNewGame();
+				return true;
+			} else if (model.isGameActive()) {
+				int direction = getDirection(v, event);
+				switch (direction) {
+				case 0: // left
+					doMove(Model.Move.LEFT);
+					break;
+				case 1: // rotate
+					doMove(Model.Move.ROTATE);
+					break;
+				case 2: // down
+					doMove(Model.Move.DOWN);
+					break;
+				case 3: // right
+					doMove(Model.Move.RIGHT);
+					break;
+				}
+				return true;
+			} else {
+				// Paused state
+				activateGame();
+				return true;
+			}
+		}
+	};
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -37,40 +68,11 @@ public class MainActivity extends Activity {
 		tetrisView = TetrisView.class.cast(findViewById(R.id.tetris));
 		tetrisView.setModel(model);
 		tetrisView.setActivity(this);
-		tetrisView.setOnTouchListener(new View.OnTouchListener() {
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				if (model.isGameOver() || model.isGameBeforeStart()) {
-					startNewGame();
-					return true;
-				} else if (model.isGameActive()) {
-					int direction = getDirection(v, event);
-					switch (direction) {
-					case 0: // left
-						doMove(Model.Move.LEFT);
-						break;
-					case 1: // rotate
-						doMove(Model.Move.ROTATE);
-						break;
-					case 2: // down
-						doMove(Model.Move.DOWN);
-						break;
-					case 3: // right
-						doMove(Model.Move.RIGHT);
-						break;
-					}
-					return true;
-				} else {
-					model.setGameActive();
-					// Paused state
-					return true;
-				}
-			}
-		});
+		tetrisView.setOnTouchListener(onTouchListener);
 
 		scoresView = TextView.class.cast(findViewById(R.id.scores));
 		scoresCounter = new ScoresCounter(scoresView,
-			getString( R.string.scores_format));
+				getString(R.string.scores_format));
 		model.setCounter(scoresCounter);
 		highScoresView = TextView.class.cast(findViewById(R.id.high_scores));
 
@@ -115,7 +117,7 @@ public class MainActivity extends Activity {
 			messageView.setVisibility(View.INVISIBLE);
 			scoresCounter.reset();
 			model.gameStart();
-			//tetrisView.setGameCommand( Model.Move.DOWN );
+			tetrisView.setGameCommandWithDelay(Model.Move.DOWN);
 		}
 	}
 
@@ -132,6 +134,23 @@ public class MainActivity extends Activity {
 		messageView.setText(getApplicationContext()
 				.getText(R.string.mode_pause));
 		storeHighScoresAndLines();
+	}
+	
+	public void activateGame() {
+		messageView.setVisibility(View.INVISIBLE);
+		model.setGameActive();	
+	}
+	
+	@Override
+	public void onBackPressed() {
+		if( model.isGameOver() || model.isGameBeforeStart() || model.isGamePaused() ) {
+			finish();
+			return;
+		}
+		if( model.isGameActive() ) {
+			pauseGame();
+			return;
+		}
 	}
 
 	@Override

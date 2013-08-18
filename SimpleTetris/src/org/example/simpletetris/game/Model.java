@@ -134,6 +134,7 @@ public class Model {
 				if (!newBlock()) {
 					// Game is over
 					setGameStatus(GameStatus.OVER);
+					
 					activeBlock = null;
 					reset(false);
 				}

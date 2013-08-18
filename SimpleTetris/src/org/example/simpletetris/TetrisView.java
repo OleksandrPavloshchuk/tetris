@@ -54,16 +54,13 @@ public class TetrisView extends View {
 		}
 		if( Model.Move.DOWN.equals(move) ) {
 			model.genereteNewField(move);
-			invalidate();
-			if (model.isGameOver()) {
-				activity.endGame();
-			}			
+			invalidate();			
 			return;
 		}
 		setGameCommandWithDelay(move);
 	}
 
-	private void setGameCommandWithDelay(Model.Move move) {
+	public void setGameCommandWithDelay(Model.Move move) {		
 		long now = System.currentTimeMillis();
 
 		if (now - lastMove > DELAY) {
@@ -146,15 +143,12 @@ public class TetrisView extends View {
 			if (null == owner.model) {
 				return;
 			}
-			if( !owner.model.isGameActive() ) {
-				return;
-			}
-
 			if (owner.model.isGameOver()) {
 				owner.activity.endGame();
-				return;
+			}			
+			if( owner.model.isGameActive() ) {
+				owner.setGameCommandWithDelay(Model.Move.DOWN);
 			}
-			owner.setGameCommandWithDelay(Model.Move.DOWN);
 		}
 
 		public void sleep(long delayMillis) {
