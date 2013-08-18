@@ -2,19 +2,25 @@
  * ScoresCounter    counting the scores eraned in Tetris
  */
 
-package org.example.simpletetris;
+package org.example.simpletetris.game;
 
+import android.os.Bundle;
 import android.widget.TextView;
 
 public class ScoresCounter {
+	private static final String TAG_SCORES = "scores";
+	private static final String TAG_LINES = "lines";
+	
 	private int scores = 0;
 	private int lines = 0;
 	private int scoreDelta = 4;
 	
 	private final TextView status;
+	private final String format;
 	
-	public ScoresCounter( TextView status ) {
+	public ScoresCounter( TextView status, String format ) {
 		this.status = status;
+		this.format = format;
 	}
 
 	public void reset() {
@@ -43,6 +49,16 @@ public class ScoresCounter {
 	
 
 	private void updateStatus() {
-		status.setText( String.format( "Lines: %d Scores: %d", lines, scores));
+		status.setText( String.format( format, lines, scores));
+	}
+
+	public void storeTo(Bundle bundle) {
+		bundle.putInt(TAG_LINES, lines);
+		bundle.putInt(TAG_SCORES, scores);
+	}
+
+	public void restoreFrom(Bundle bundle) {
+		this.lines = bundle.getInt(TAG_LINES);
+		this.scores = bundle.getInt(TAG_SCORES);
 	}	
 }

@@ -1,10 +1,13 @@
-package org.example.simpletetris;
+package org.example.simpletetris.game;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class Block {
+
+public class Block implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	public enum BlockColor {
 		RED(0xff990000, (byte) 2), GREEN(0xff009900, (byte) 3), BLUE(
@@ -28,7 +31,7 @@ public class Block {
 	// current block state:
 	private int shape = 0;
 	private int frame = 0;
-	private Point topLeft = new Point(Model.NUM_COLS >> 1, 0);
+	private Point topLeft = new Point( Model.NUM_COLS / 2, 0);
 	private BlockColor color;
 
 	public int getFrame() {
@@ -74,7 +77,12 @@ public class Block {
 		int indexShape = random.nextInt(Shape.values().length);
 		BlockColor blockColor = BlockColor.values()[random.nextInt(BlockColor
 				.values().length)];
-		return new Block(indexShape, blockColor);
+		Block result = new Block(indexShape, blockColor);
+		// Set to the middle
+		result.topLeft.setX( result.topLeft.getX() - Shape.values()[indexShape].getStartMiddleX());
+		
+		return result;
+		
 	}
 
 	private Block(int nShape, BlockColor blockColor) {
@@ -87,14 +95,14 @@ public class Block {
 	}
 
 	private enum Shape {
-		S1(1) {
+		S1(1, 1) {
 			@Override
 			public Frame getFrame(int n) {
 				return new Frame(2).add("11").add("11");
 			}
 
 		},
-		S2(2) {
+		S2(2, 2) {
 
 			@Override
 			public Frame getFrame(int n) {
@@ -107,7 +115,7 @@ public class Block {
 				throw new IllegalArgumentException("Invalid frame number: " + n);
 			}
 		},
-		S3(4) {
+		S3(4, 1) {
 			@Override
 			public Frame getFrame(int n) {
 				switch (n) {
@@ -123,7 +131,7 @@ public class Block {
 				throw new IllegalArgumentException("Invalid frame number: " + n);
 			}
 		},
-		S4(4) {
+		S4(4, 1) {
 			@Override
 			public Frame getFrame(int n) {
 				switch (n) {
@@ -139,7 +147,7 @@ public class Block {
 				throw new IllegalArgumentException("Invalid frame number: " + n);
 			}
 		},
-		S5(4) {
+		S5(4, 1) {
 			@Override
 			public Frame getFrame(int n) {
 				switch (n) {
@@ -155,7 +163,7 @@ public class Block {
 				throw new IllegalArgumentException("Invalid frame number: " + n);
 			}
 		},
-		S6(2) {
+		S6(2, 1) {
 			@Override
 			public Frame getFrame(int n) {
 				switch (n) {
@@ -167,7 +175,7 @@ public class Block {
 				throw new IllegalArgumentException("Invalid frame number: " + n);
 			}
 		},
-		S7(2) {
+		S7(2, 1) {
 			@Override
 			public Frame getFrame(int n) {
 				switch (n) {
@@ -181,9 +189,15 @@ public class Block {
 			}
 		};
 		private final int frameCount;
+		private final int startMiddleX;
 
-		private Shape(int frameCount) {
+		private Shape(int frameCount, int startMiddleX) {
 			this.frameCount = frameCount;
+			this.startMiddleX = startMiddleX;
+		}
+		
+		private int getStartMiddleX() {
+			return startMiddleX;
 		}
 
 		public abstract Frame getFrame(int n);
