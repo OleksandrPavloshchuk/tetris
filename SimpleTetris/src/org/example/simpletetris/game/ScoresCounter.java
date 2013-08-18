@@ -2,7 +2,7 @@
  * ScoresCounter    counting the scores eraned in Tetris
  */
 
-package org.example.simpletetris;
+package org.example.simpletetris.game;
 
 import android.os.Bundle;
 import android.widget.TextView;

@@ -1,5 +1,8 @@
 package org.example.simpletetris;
 
+import org.example.simpletetris.game.Block;
+import org.example.simpletetris.game.Model;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -12,9 +15,9 @@ import android.view.View;
 
 public class TetrisView extends View {
 
-	private static final int DELAY = 400;
+	private static final int DELAY = 300;
 
-	private RedrawHandler redrawHandler = new RedrawHandler();
+	private RedrawHandler redrawHandler = new RedrawHandler(this);
 
 	private static final int BLOCK_OFFSET = 2;
 	private static final int FRAME_OFFSET = 10;
@@ -26,7 +29,7 @@ public class TetrisView extends View {
 	private Dimension cellSize = null;
 	private Model model = null;
 	private long lastMove = 0;
-	
+
 	private MainActivity activity;
 
 	public TetrisView(Context context, AttributeSet attrs) {
@@ -40,24 +43,35 @@ public class TetrisView extends View {
 	public void setModel(Model model) {
 		this.model = model;
 	}
-	
+
 	public void setActivity(MainActivity activity) {
 		this.activity = activity;
 	}
-	
 
-	public void update(Model.Move move) {
+	public void setGameCommand(Model.Move move) {
 		if (null == model || !model.isGameActive()) {
 			return;
 		}
+		if( Model.Move.DOWN.equals(move) ) {
+			model.genereteNewField(move);
+			invalidate();
+			if (model.isGameOver()) {
+				activity.endGame();
+			}			
+			return;
+		}
+		setGameCommandWithDelay(move);
+	}
+
+	private void setGameCommandWithDelay(Model.Move move) {
 		long now = System.currentTimeMillis();
 
 		if (now - lastMove > DELAY) {
-			model.generateNewField(move);
+			model.genereteNewField(move);
 			invalidate();
 			lastMove = now;
 		}
-		redrawHandler.sleep(DELAY);		
+		redrawHandler.sleep(DELAY);
 	}
 
 	private void drawCell(Canvas canvas, int row, int col) {
@@ -119,17 +133,28 @@ public class TetrisView extends View {
 		this.cellSize = new Dimension(cellWidth, cellHeight);
 	}
 
-	class RedrawHandler extends Handler {
+	static class RedrawHandler extends Handler {
+
+		private final TetrisView owner;
+
+		private RedrawHandler(TetrisView owner) {
+			this.owner = owner;
+		}
 
 		@Override
 		public void handleMessage(Message msg) {
-			if( model.isGamePaused() ) {
-				// TODO: switch to the pause mode
-			} else if ( model.isGameOver() ) {
-				activity.endGame();
+			if (null == owner.model) {
 				return;
 			}
-			TetrisView.this.update(Model.Move.DOWN);
+			if( !owner.model.isGameActive() ) {
+				return;
+			}
+
+			if (owner.model.isGameOver()) {
+				owner.activity.endGame();
+				return;
+			}
+			owner.setGameCommandWithDelay(Model.Move.DOWN);
 		}
 
 		public void sleep(long delayMillis) {

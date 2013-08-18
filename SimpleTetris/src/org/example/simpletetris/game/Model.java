@@ -1,16 +1,17 @@
 
-package org.example.simpletetris;
+package org.example.simpletetris.game;
+
 
 import android.os.Bundle;
 
 public class Model {
 
-	public enum Move {
-		LEFT, RIGHT, DOWN, ROTATE
-	}
-
 	public enum GameStatus {
-		READY, ACTIVE, SUSPENDED, OVER
+		BEFORE_START {}, ACTIVE {}, PAUSED {}, OVER {};
+	}
+	
+	public enum Move {
+		LEFT, RIGHT, ROTATE, DOWN
 	}
 	
 	private static final String TAG_DATA = "data";
@@ -21,7 +22,7 @@ public class Model {
 	public static final int NUM_ROWS = 20; // number of rows in field
 
 	// game status constants:
-	private GameStatus gameStatus = GameStatus.READY;
+	private GameStatus gameStatus = GameStatus.BEFORE_START;
 
 	// array of cell values:
 	private byte[][] field = null;
@@ -48,8 +49,8 @@ public class Model {
 		return GameStatus.OVER.equals(gameStatus);
 	}
 	
-	public boolean isGameReady() {
-		return GameStatus.READY.equals(gameStatus);
+	public boolean isGameBeforeStart() {
+		return GameStatus.BEFORE_START.equals(gameStatus);
 	}	
 
 	public void reset() {
@@ -64,7 +65,7 @@ public class Model {
 		field[nRow][nCol] = nStatus;
 	}
 
-	public void setGameStatus(GameStatus gameStatus) {
+	public synchronized void setGameStatus(GameStatus gameStatus) {
 		this.gameStatus = gameStatus;
 	}
 
@@ -83,17 +84,14 @@ public class Model {
 	}
 	
 	public void setGamePaused() {
-		setGameStatus(GameStatus.SUSPENDED);
+		setGameStatus(GameStatus.PAUSED);
 	}
 
 	public boolean isGamePaused() {
-		return GameStatus.SUSPENDED.equals(gameStatus);
+		return GameStatus.PAUSED.equals(gameStatus);
 	}	
-
-	/**
-	 * Create and check the array of new data:
-	 */
-	public synchronized void generateNewField(Move move) {	
+	
+	public synchronized void genereteNewField(Move move) {	
 		
 		if (!isGameActive()) {
 			return;

@@ -1,5 +1,8 @@
 package org.example.simpletetris;
 
+import org.example.simpletetris.game.Model;
+import org.example.simpletetris.game.ScoresCounter;
+
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -37,11 +40,10 @@ public class MainActivity extends Activity {
 		tetrisView.setOnTouchListener(new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
-				if (model.isGameOver() || model.isGameReady()) {
+				if (model.isGameOver() || model.isGameBeforeStart()) {
 					startNewGame();
-					return false;
+					return true;
 				} else if (model.isGameActive()) {
-
 					int direction = getDirection(v, event);
 					switch (direction) {
 					case 0: // left
@@ -50,17 +52,16 @@ public class MainActivity extends Activity {
 					case 1: // rotate
 						doMove(Model.Move.ROTATE);
 						break;
-					case 2: // move down twice
-						doMove(Model.Move.DOWN);
+					case 2: // down
 						doMove(Model.Move.DOWN);
 						break;
 					case 3: // right
 						doMove(Model.Move.RIGHT);
 						break;
 					}
-
 					return true;
 				} else {
+					model.setGameActive();
 					// Paused state
 					return true;
 				}
@@ -104,7 +105,7 @@ public class MainActivity extends Activity {
 
 	public void doMove(Model.Move move) {
 		if (model.isGameActive()) {
-			tetrisView.update(move);
+			tetrisView.setGameCommand(move);
 			scoresView.invalidate();
 		}
 	}
@@ -114,7 +115,7 @@ public class MainActivity extends Activity {
 			messageView.setVisibility(View.INVISIBLE);
 			scoresCounter.reset();
 			model.gameStart();
-			tetrisView.update(Model.Move.DOWN);
+			//tetrisView.setGameCommand( Model.Move.DOWN );
 		}
 	}
 
@@ -123,7 +124,6 @@ public class MainActivity extends Activity {
 		storeHighScoresAndLines();
 		messageView
 				.setText(getApplicationContext().getText(R.string.mode_over));
-		storeHighScoresAndLines();
 	}
 
 	public void pauseGame() {
