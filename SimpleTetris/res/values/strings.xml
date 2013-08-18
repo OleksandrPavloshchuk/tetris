@@ -2,8 +2,10 @@
 <resources>
 
     <string name="app_name">SimpleTetris</string>
-    <string name="mode_ready">Tetris\nPress Up To Play</string>
-    <string name="mode_pause">Paused\nPress Up To Resume</string>
-    <string name="mode_lose">Game Over\nScore: %1$d\nPress Up To Play</string>
+    <string name="mode_ready">Tetris\nTouch The Screen To Play</string>
+    <string name="mode_pause">Paused\nTouch The Screen To Resume</string>
+    <string name="mode_over">Game Over\nTouch The Screen To Play Again</string>
+    <string name="high_scores_format"> High Lines: %1$d High Scores: %2$d</string>
+    <string name="scores_format"> Lines: %1$d Scores: %2$d</string>
 
 </resources>

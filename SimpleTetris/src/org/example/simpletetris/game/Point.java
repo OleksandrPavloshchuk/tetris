@@ -1,4 +1,4 @@
-package org.example.simpletetris;
+package org.example.simpletetris.game;
 
 public class Point {
 	private int x;
