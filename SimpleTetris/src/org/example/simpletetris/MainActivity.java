@@ -5,6 +5,7 @@ import org.example.simpletetris.game.ScoresCounter;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
@@ -87,6 +88,12 @@ public class MainActivity extends Activity {
 			messageView.setText(getApplicationContext().getString(
 					R.string.mode_ready));
 		}
+		
+		// Assign font:
+		Typeface tf = Typeface.createFromAsset(getAssets(), "Callie-Mae.ttf");
+		scoresView.setTypeface(tf);
+		highScoresView.setTypeface(tf);
+		messageView.setTypeface(tf);
 
 	}
 

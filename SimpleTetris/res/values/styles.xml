@@ -19,6 +19,12 @@
     
     <style name="Banner" parent="@android:style/TextAppearance.DeviceDefault.Large">
         <item name="android:textColor">#ffcc00ff</item>
-    </style>
+        <item name="android:paddingLeft">4dp</item>
+        </style>
+    
+    <style name="Scores" parent="@android:style/TextAppearance.DeviceDefault.Large">
+        <item name="android:textColor">#ffffcc00</item>
+        <item name="android:paddingLeft">4dp</item>
+    </style>    
 
 </resources>
