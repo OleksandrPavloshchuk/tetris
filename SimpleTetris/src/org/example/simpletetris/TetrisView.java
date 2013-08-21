@@ -20,13 +20,15 @@ public class TetrisView extends View {
 	private RedrawHandler redrawHandler = new RedrawHandler(this);
 
 	private static final int BLOCK_OFFSET = 2;
-	private static final int FRAME_OFFSET = 10;
+	private static final int FRAME_OFFSET_BASE = 10;
 
 	private final Paint paint = new Paint();
 
 	private int width;
 	private int height;
 	private Dimension cellSize = null;
+	private Dimension frameOffset = null;
+
 	private Model model = null;
 	private long lastMove = 0;
 
@@ -52,15 +54,15 @@ public class TetrisView extends View {
 		if (null == model || !model.isGameActive()) {
 			return;
 		}
-		if( Model.Move.DOWN.equals(move) ) {
+		if (Model.Move.DOWN.equals(move)) {
 			model.genereteNewField(move);
-			invalidate();			
+			invalidate();
 			return;
 		}
 		setGameCommandWithDelay(move);
 	}
 
-	public void setGameCommandWithDelay(Model.Move move) {		
+	public void setGameCommandWithDelay(Model.Move move) {
 		long now = System.currentTimeMillis();
 
 		if (now - lastMove > DELAY) {
@@ -85,11 +87,11 @@ public class TetrisView extends View {
 
 	private void drawCell(Canvas canvas, int x, int y, int colorFG) {
 		paint.setColor(colorFG);
-		float top = FRAME_OFFSET + y * cellSize.getHeight() + BLOCK_OFFSET;
-		float left = FRAME_OFFSET + x * cellSize.getWidth() + BLOCK_OFFSET;
-		float bottom = FRAME_OFFSET + (y + 1) * cellSize.getHeight()
+		float top = frameOffset.getHeight() + y * cellSize.getHeight() + BLOCK_OFFSET;
+		float left = frameOffset.getWidth() + x * cellSize.getWidth() + BLOCK_OFFSET;
+		float bottom = frameOffset.getHeight() + (y + 1) * cellSize.getHeight()
 				- BLOCK_OFFSET;
-		float right = FRAME_OFFSET + (x + 1) * cellSize.getWidth()
+		float right = frameOffset.getWidth() + (x + 1) * cellSize.getWidth()
 				- BLOCK_OFFSET;
 		RectF rect = new RectF(left, top, right, bottom);
 
@@ -116,8 +118,9 @@ public class TetrisView extends View {
 		paint.setColor(Color.GRAY);
 		canvas.drawRect(0, 0, width, height, paint);
 		paint.setColor(Color.WHITE);
-		canvas.drawRect(FRAME_OFFSET, FRAME_OFFSET, width - FRAME_OFFSET,
-				height - FRAME_OFFSET, paint);
+		canvas.drawRect(frameOffset.getWidth(), frameOffset.getHeight(), width
+				- frameOffset.getWidth(), height - frameOffset.getHeight(),
+				paint);
 	}
 
 	@Override
@@ -125,9 +128,16 @@ public class TetrisView extends View {
 		super.onSizeChanged(w, h, oldw, oldh);
 		width = w;
 		height = h;
-		int cellWidth = (width - 2 * FRAME_OFFSET) / Model.NUM_COLS;
-		int cellHeight = (height - 2 * FRAME_OFFSET) / Model.NUM_ROWS;
-		this.cellSize = new Dimension(cellWidth, cellHeight);
+		int cellWidth = (width - 2 * FRAME_OFFSET_BASE) / Model.NUM_COLS;
+		int cellHeight = (height - 2 * FRAME_OFFSET_BASE) / Model.NUM_ROWS;
+
+		int n = Math.min(cellWidth, cellHeight);
+
+		this.cellSize = new Dimension(n, n);
+
+		int offsetX = (w - Model.NUM_COLS * n) / 2;
+		int offsetY = (h - Model.NUM_ROWS * n) / 2;
+		this.frameOffset = new Dimension(offsetX, offsetY);
 	}
 
 	static class RedrawHandler extends Handler {
@@ -145,8 +155,8 @@ public class TetrisView extends View {
 			}
 			if (owner.model.isGameOver()) {
 				owner.activity.endGame();
-			}			
-			if( owner.model.isGameActive() ) {
+			}
+			if (owner.model.isGameActive()) {
 				owner.setGameCommandWithDelay(Model.Move.DOWN);
 			}
 		}
