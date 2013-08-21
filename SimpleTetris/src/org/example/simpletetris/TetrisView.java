@@ -1,9 +1,14 @@
 package org.example.simpletetris;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.example.simpletetris.game.Block;
 import org.example.simpletetris.game.Model;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -11,11 +16,12 @@ import android.graphics.RectF;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 public class TetrisView extends View {
 
-	private static final int DELAY = 300;
+	private static final int DELAY = 400;
 
 	private RedrawHandler redrawHandler = new RedrawHandler(this);
 
@@ -87,8 +93,10 @@ public class TetrisView extends View {
 
 	private void drawCell(Canvas canvas, int x, int y, int colorFG) {
 		paint.setColor(colorFG);
-		float top = frameOffset.getHeight() + y * cellSize.getHeight() + BLOCK_OFFSET;
-		float left = frameOffset.getWidth() + x * cellSize.getWidth() + BLOCK_OFFSET;
+		float top = frameOffset.getHeight() + y * cellSize.getHeight()
+				+ BLOCK_OFFSET;
+		float left = frameOffset.getWidth() + x * cellSize.getWidth()
+				+ BLOCK_OFFSET;
 		float bottom = frameOffset.getHeight() + (y + 1) * cellSize.getHeight()
 				- BLOCK_OFFSET;
 		float right = frameOffset.getWidth() + (x + 1) * cellSize.getWidth()
@@ -115,9 +123,14 @@ public class TetrisView extends View {
 	}
 
 	private void drawFrame(Canvas canvas) {
-		paint.setColor(Color.GRAY);
-		canvas.drawRect(0, 0, width, height, paint);
-		paint.setColor(Color.WHITE);
+		try {
+			InputStream input = activity.getAssets().open("frame.png");
+			Bitmap bitmap = BitmapFactory.decodeStream(input);
+			canvas.drawBitmap(bitmap, 0, 0, paint);
+		} catch (IOException ex) {
+			Log.e("asset", "can't open asset bitmap", ex);
+		}
+		paint.setColor(Color.LTGRAY);
 		canvas.drawRect(frameOffset.getWidth(), frameOffset.getHeight(), width
 				- frameOffset.getWidth(), height - frameOffset.getHeight(),
 				paint);
