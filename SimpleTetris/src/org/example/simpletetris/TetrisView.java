@@ -123,6 +123,7 @@ public class TetrisView extends View {
 	}
 
 	private void drawFrame(Canvas canvas) {
+		/* TODO: draw background from style
 		try {
 			InputStream input = activity.getAssets().open("frame.png");
 			Bitmap bitmap = BitmapFactory.decodeStream(input);
@@ -130,6 +131,7 @@ public class TetrisView extends View {
 		} catch (IOException ex) {
 			Log.e("asset", "can't open asset bitmap", ex);
 		}
+		*/
 		paint.setColor(Color.LTGRAY);
 		canvas.drawRect(frameOffset.getWidth(), frameOffset.getHeight(), width
 				- frameOffset.getWidth(), height - frameOffset.getHeight(),
