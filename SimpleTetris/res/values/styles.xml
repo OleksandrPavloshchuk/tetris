@@ -17,8 +17,16 @@
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
     
-    <style name="Banner" parent="@android:style/TextAppearance.DeviceDefault.Large">
-        <item name="android:textColor">#ffcc00ff</item>
-    </style>
+    <style name="Banner">
+        <item name="android:textSize">30sp</item>
+        <item name="android:textColor">#ffe08040</item>
+        <item name="android:paddingLeft">4dp</item>
+        </style>
+    
+    <style name="Scores">
+        <item name="android:textSize">30sp</item>
+        <item name="android:textColor">#ffe08040</item>
+        <item name="android:paddingLeft">4dp</item>
+    </style>    
 
 </resources>
