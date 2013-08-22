@@ -18,15 +18,16 @@
     </style>
     
     <style name="Banner">
-        <item name="android:textSize">30sp</item>
-        <item name="android:textColor">#ffe08040</item>
+        <item name="android:textSize">32sp</item>
+        <item name="android:textColor">#fff08040</item>
         <item name="android:paddingLeft">4dp</item>
         </style>
     
     <style name="Scores">
-        <item name="android:textSize">30sp</item>
-        <item name="android:textColor">#ffe08040</item>
+        <item name="android:textSize">32sp</item>
+        <item name="android:textColor">#fff08040</item>
         <item name="android:paddingLeft">4dp</item>
+        <item name="android:background">#ffcccccc</item>
     </style>    
 
 </resources>

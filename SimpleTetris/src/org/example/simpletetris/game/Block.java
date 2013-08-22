@@ -5,19 +5,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.example.simpletetris.R;
+
 
 public class Block implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public enum BlockColor {
-		RED(0xff990000, (byte) 2), GREEN(0xff009900, (byte) 3), BLUE(
+		RED( R.drawable.red_block, (byte) 2)
+		
+		;
+		/* TODO: UNCOMMENT!!!!
+		, GREEN(0xff009900, (byte) 3), BLUE(
 				0xff000099, (byte) 4), YELLOW(0xffffcc33, (byte) 5), CYAN(
 				0xff3399aa, (byte) 6);
-		private final int color;
+		*/		
 		private final byte value;
+		private final int resourceId;
 
-		private BlockColor(int color, byte value) {
-			this.color = color;
+		private BlockColor(int resourceId, byte value) {
+			this.resourceId = resourceId;
 			this.value = value;
 		}
 	}
@@ -38,18 +45,18 @@ public class Block implements Serializable {
 		return frame;
 	}
 
-	public int getColor() {
-		return color.color;
+	public int getResourceId() {
+		return color.resourceId;
 	}
 
 	public byte getStaticValue() {
 		return color.value;
 	}
 
-	public static int getColorForStaticValue(byte b) {
+	public static int getResourceIdForStaticValue(byte b) {
 		for (BlockColor item : BlockColor.values()) {
 			if (b == item.value) {
-				return item.color;
+				return item.resourceId;
 			}
 		}
 		return -1; // color is not found
