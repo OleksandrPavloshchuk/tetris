@@ -12,14 +12,12 @@ public class Block implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public enum BlockColor {
-		RED( R.drawable.red_block, (byte) 2)
-		
-		;
-		/* TODO: UNCOMMENT!!!!
-		, GREEN(0xff009900, (byte) 3), BLUE(
-				0xff000099, (byte) 4), YELLOW(0xffffcc33, (byte) 5), CYAN(
-				0xff3399aa, (byte) 6);
-		*/		
+		RED( R.drawable.red_block, (byte) 2),
+		GREEN( R.drawable.green_block, (byte) 3),
+		BLUE( R.drawable.blue_block, (byte) 4),
+		YELLOW( R.drawable.yellow_block, (byte) 5),
+		CYAN(	R.drawable.cyan_block, (byte) 6);
+
 		private final byte value;
 		private final int resourceId;
 

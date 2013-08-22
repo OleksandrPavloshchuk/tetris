@@ -90,7 +90,7 @@ public class TetrisView extends View {
 
 	private void drawCell(Canvas canvas, int x, int y, int resourceId) {
 		
-		paint.setColor( resourceId );
+		// paint.setColor( resourceId );
 		float top = frameOffset.getHeight() + y * cellSize.getHeight()
 				+ BLOCK_OFFSET;
 		float left = frameOffset.getWidth() + x * cellSize.getWidth()
@@ -100,14 +100,13 @@ public class TetrisView extends View {
 		float right = frameOffset.getWidth() + (x + 1) * cellSize.getWidth()
 				- BLOCK_OFFSET;
 		RectF rect = new RectF(left, top, right, bottom);
-		canvas.drawRoundRect(rect, 4, 4, paint);
+		// canvas.drawRoundRect(rect, 4, 4, paint);
 
-		/* TODO: experimental code (2013/08/22)
+		// /* TODO: experimental code (2013/08/22)
 		Bitmap b = BitmapFactory.decodeResource( getResources(), resourceId);
 		
-		Rect src = new Rect(0, 0, 16, 16);
-		canvas.drawBitmap(b, src, rect, paint);
-		*/
+		canvas.drawBitmap(b, null, rect, paint );
+		// */
 		
 	}
 
