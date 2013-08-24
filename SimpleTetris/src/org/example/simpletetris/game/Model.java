@@ -26,17 +26,16 @@ public class Model {
 	public static final int NUM_COLS = 10; // number of columns in field
 	public static final int NUM_ROWS = 20; // number of rows in field
 
-	// game status constants:
 	private GameStatus gameStatus = GameStatus.BEFORE_START;
 
 	// array of cell values:
 	private byte[][] field = null;
 
-	// active block:
 	private Block activeBlock = null;
 
-	// scores counter:
 	private ScoresCounter counter = null;
+	private ScoresCounter highCounter = null;
+	
 
 	public Model() {
 		field = new byte[NUM_ROWS][NUM_COLS];
@@ -45,6 +44,10 @@ public class Model {
 	public void setCounter(ScoresCounter counter) {
 		this.counter = counter;
 	}
+	
+	public void setHighCounter(ScoresCounter counter) {
+		this.highCounter = counter;
+	}	
 
 	public boolean isGameActive() {
 		return GameStatus.ACTIVE.equals(gameStatus);
@@ -80,6 +83,7 @@ public class Model {
 			return;
 		}
 		setGameActive();
+		reset( false );
 		activeBlock = Block.createBlock();
 
 	}
@@ -147,7 +151,7 @@ public class Model {
 					setGameStatus(GameStatus.OVER);
 
 					activeBlock = null;
-					reset(false);
+//					reset(false);
 				}
 			}
 

@@ -22,13 +22,13 @@ public class MainActivity extends Activity {
 	private TextView scoresView = null;
 	private TextView highScoresView = null;
 	private ScoresCounter scoresCounter = null;
+	private ScoresCounter highScoresCounter = null;
 	private Model model = new Model();
 
 	private TextView messageView = null;
 
-	// TODO: use some object here (2013/07/16)
-	private int highLines = 0;
-	private int highScores = 0;
+	// private int highLines = 0;
+	// private int highScores = 0;
 
 	private final View.OnTouchListener onTouchListener = new View.OnTouchListener() {
 		@Override
@@ -75,7 +75,12 @@ public class MainActivity extends Activity {
 		scoresCounter = new ScoresCounter(scoresView,
 				getString(R.string.scores_format));
 		model.setCounter(scoresCounter);
+
 		highScoresView = TextView.class.cast(findViewById(R.id.high_scores));
+		highScoresCounter = new ScoresCounter(highScoresView,
+				getString(R.string.high_scores_format));
+		model.setHighCounter(highScoresCounter);
+		
 
 		loadHighScoresAndLines();
 
@@ -88,7 +93,7 @@ public class MainActivity extends Activity {
 			messageView.setText(getApplicationContext().getString(
 					R.string.mode_ready));
 		}
-		
+
 		// Assign font:
 		Typeface tf = Typeface.createFromAsset(getAssets(), "Callie-Mae.ttf");
 		scoresView.setTypeface(tf);
@@ -142,19 +147,20 @@ public class MainActivity extends Activity {
 				.getText(R.string.mode_pause));
 		storeHighScoresAndLines();
 	}
-	
+
 	public void activateGame() {
 		messageView.setVisibility(View.INVISIBLE);
-		model.setGameActive();	
+		model.setGameActive();
 	}
-	
+
 	@Override
 	public void onBackPressed() {
-		if( model.isGameOver() || model.isGameBeforeStart() || model.isGamePaused() ) {
+		if (model.isGameOver() || model.isGameBeforeStart()
+				|| model.isGamePaused()) {
 			finish();
 			return;
 		}
-		if( model.isGameActive() ) {
+		if (model.isGameActive()) {
 			pauseGame();
 			return;
 		}
@@ -189,28 +195,27 @@ public class MainActivity extends Activity {
 
 	private void loadHighScoresAndLines() {
 		SharedPreferences prefs = getPreferences(MODE_PRIVATE);
-		highLines = prefs.getInt(PREFS_HIGH_LINES, 0);
-		highScores = prefs.getInt(PREFS_HIGH_SCORES, 0);
+		highScoresCounter.setLines( prefs.getInt(PREFS_HIGH_LINES, 0) );
+		highScoresCounter.setScores(  prefs.getInt(PREFS_HIGH_SCORES, 0));		
 		updateHighScoresView();
 	}
 
 	private void updateHighScoresView() {
-		highScoresView.setText(String.format(
-				getString(R.string.high_scores_format), highLines, highScores));
+		highScoresCounter.updateView();
 	}
 
-	private void storeHighScoresAndLines() {
-		if (highScores < scoresCounter.getScores()) {
-			highScores = scoresCounter.getScores();
+	private void storeHighScoresAndLines() {		
+		if ( highScoresCounter.getScores() < scoresCounter.getScores()) {
+			highScoresCounter.setScores(scoresCounter.getScores());
 		}
-		if (highLines < scoresCounter.getLines()) {
-			highLines = scoresCounter.getLines();
+		if (highScoresCounter.getLines() < scoresCounter.getLines()) {
+			highScoresCounter.setLines( scoresCounter.getLines() );
 		}
 
 		SharedPreferences prefs = getPreferences(MODE_PRIVATE);
 		SharedPreferences.Editor editor = prefs.edit();
-		editor.putInt(PREFS_HIGH_LINES, highLines);
-		editor.putInt(PREFS_HIGH_SCORES, highScores);
+		editor.putInt(PREFS_HIGH_LINES, highScoresCounter.getLines());
+		editor.putInt(PREFS_HIGH_SCORES,  highScoresCounter.getScores());
 
 		editor.commit();
 		updateHighScoresView();
