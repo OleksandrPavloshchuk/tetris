@@ -99,14 +99,9 @@ public class TetrisView extends View {
 		float right = frameOffset.getWidth() + (x + 1) * cellSize.getWidth()
 				- BLOCK_OFFSET;
 		RectF rect = new RectF(left, top, right, bottom);
-		// canvas.drawRoundRect(rect, 4, 4, paint);
 
-		// /* TODO: experimental code (2013/08/22)
-		Bitmap b = BitmapFactory.decodeResource( getResources(), resourceId);
-		
+		Bitmap b = BitmapFactory.decodeResource( getResources(), resourceId);		
 		canvas.drawBitmap(b, null, rect, paint );
-		// */
-		
 	}
 
 	@Override

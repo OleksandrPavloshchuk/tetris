@@ -3,6 +3,8 @@ package org.example.simpletetris;
 import org.example.simpletetris.game.Model;
 import org.example.simpletetris.game.ScoresCounter;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
@@ -12,6 +14,12 @@ import android.view.View;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
+
+	// private static final String FONT_NAME = "Callie-Mae.ttf";
+	
+	private static final String FONT_NAME = "SpicyRice_Regular.ttf";
+
+	private static final int ANIMATION_DURATION = 400;
 
 	private static final String ICICLE_TAG = "simple-tetris";
 
@@ -26,9 +34,6 @@ public class MainActivity extends Activity {
 	private Model model = new Model();
 
 	private TextView messageView = null;
-
-	// private int highLines = 0;
-	// private int highScores = 0;
 
 	private final View.OnTouchListener onTouchListener = new View.OnTouchListener() {
 		@Override
@@ -80,7 +85,6 @@ public class MainActivity extends Activity {
 		highScoresCounter = new ScoresCounter(highScoresView,
 				getString(R.string.high_scores_format));
 		model.setHighCounter(highScoresCounter);
-		
 
 		loadHighScoresAndLines();
 
@@ -95,7 +99,7 @@ public class MainActivity extends Activity {
 		}
 
 		// Assign font:
-		Typeface tf = Typeface.createFromAsset(getAssets(), "Callie-Mae.ttf");
+		Typeface tf = Typeface.createFromAsset(getAssets(), FONT_NAME);
 		scoresView.setTypeface(tf);
 		highScoresView.setTypeface(tf);
 		messageView.setTypeface(tf);
@@ -125,7 +129,7 @@ public class MainActivity extends Activity {
 	}
 
 	public final void startNewGame() {
-		if (!model.isGameActive()) {
+		if (!model.isGameActive()) {			
 			messageView.setVisibility(View.INVISIBLE);
 			scoresCounter.reset();
 			model.gameStart();
@@ -138,14 +142,33 @@ public class MainActivity extends Activity {
 		storeHighScoresAndLines();
 		messageView
 				.setText(getApplicationContext().getText(R.string.mode_over));
+		
+		animateBanner( 2 * ANIMATION_DURATION );
 	}
 
 	public void pauseGame() {
 		model.setGamePaused();
+		storeHighScoresAndLines();		
+		
 		messageView.setVisibility(View.VISIBLE);
 		messageView.setText(getApplicationContext()
 				.getText(R.string.mode_pause));
-		storeHighScoresAndLines();
+		
+		animateBanner( ANIMATION_DURATION );
+	}
+
+	private void animateBanner( long duration ) {
+		ObjectAnimator alphaAnimation = ObjectAnimator.ofFloat(messageView,
+				"alpha", 0.4f, 1f);
+		alphaAnimation.setDuration(duration);
+		
+		ObjectAnimator moveAnimation = ObjectAnimator.ofFloat(messageView,
+				"translationY", -1000f, 0f);
+		moveAnimation.setDuration(duration);
+				
+		AnimatorSet animatorSet = new AnimatorSet();
+		animatorSet.play(moveAnimation).with(alphaAnimation);
+		animatorSet.start();
 	}
 
 	public void activateGame() {
@@ -195,8 +218,8 @@ public class MainActivity extends Activity {
 
 	private void loadHighScoresAndLines() {
 		SharedPreferences prefs = getPreferences(MODE_PRIVATE);
-		highScoresCounter.setLines( prefs.getInt(PREFS_HIGH_LINES, 0) );
-		highScoresCounter.setScores(  prefs.getInt(PREFS_HIGH_SCORES, 0));		
+		highScoresCounter.setLines(prefs.getInt(PREFS_HIGH_LINES, 0));
+		highScoresCounter.setScores(prefs.getInt(PREFS_HIGH_SCORES, 0));
 		updateHighScoresView();
 	}
 
@@ -204,18 +227,18 @@ public class MainActivity extends Activity {
 		highScoresCounter.updateView();
 	}
 
-	private void storeHighScoresAndLines() {		
-		if ( highScoresCounter.getScores() < scoresCounter.getScores()) {
+	private void storeHighScoresAndLines() {
+		if (highScoresCounter.getScores() < scoresCounter.getScores()) {
 			highScoresCounter.setScores(scoresCounter.getScores());
 		}
 		if (highScoresCounter.getLines() < scoresCounter.getLines()) {
-			highScoresCounter.setLines( scoresCounter.getLines() );
+			highScoresCounter.setLines(scoresCounter.getLines());
 		}
 
 		SharedPreferences prefs = getPreferences(MODE_PRIVATE);
 		SharedPreferences.Editor editor = prefs.edit();
 		editor.putInt(PREFS_HIGH_LINES, highScoresCounter.getLines());
-		editor.putInt(PREFS_HIGH_SCORES,  highScoresCounter.getScores());
+		editor.putInt(PREFS_HIGH_SCORES, highScoresCounter.getScores());
 
 		editor.commit();
 		updateHighScoresView();
