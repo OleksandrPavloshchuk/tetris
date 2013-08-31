@@ -102,7 +102,7 @@ public class Model {
 
 	public synchronized void genereteNewField(Move move) {
 
-		if (!isGameActive()) {
+		if (!isGameActive() || null==activeBlock ) {
 			return;
 		}
 

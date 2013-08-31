@@ -16,7 +16,8 @@ public class Block implements Serializable {
 		GREEN( R.drawable.green_block, (byte) 3),
 		BLUE( R.drawable.blue_block, (byte) 4),
 		YELLOW( R.drawable.yellow_block, (byte) 5),
-		CYAN(	R.drawable.cyan_block, (byte) 6);
+		CYAN(	R.drawable.cyan_block, (byte) 6),
+		VIOLET( R.drawable.violet_block, (byte) 7 );
 
 		private final byte value;
 		private final int resourceId;
