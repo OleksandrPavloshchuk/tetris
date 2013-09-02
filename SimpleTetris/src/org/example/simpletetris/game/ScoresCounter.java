@@ -26,7 +26,7 @@ public class ScoresCounter {
 	public void reset() {
 		scores = 0;
 		lines = 0;
-		updateStatus();
+		updateView();
 	}
 
 	public int getScores() {
@@ -36,19 +36,27 @@ public class ScoresCounter {
 	public int getLines() {
 		return lines;
 	}
+	
+	public void setLines( int lines ) {
+		this.lines = lines;
+	}
+	
+	public void setScores( int scores ) {
+		this.scores = scores;
+	}
 
 	public void addScores() {
 		scores += scoreDelta;
-		updateStatus();
+		updateView();
 	}
 
 	public void addLine() {
 		lines++;
-		updateStatus();
+		updateView();
 	}
 	
 
-	private void updateStatus() {
+	public void updateView() {
 		status.setText( String.format( format, lines, scores));
 	}
 

@@ -3,6 +3,8 @@ package org.example.simpletetris;
 import org.example.simpletetris.game.Model;
 import org.example.simpletetris.game.ScoresCounter;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
@@ -13,6 +15,12 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
+	// private static final String FONT_NAME = "Callie-Mae.ttf";
+	
+	private static final String FONT_NAME = "SpicyRice_Regular.ttf";
+
+	private static final int ANIMATION_DURATION = 400;
+
 	private static final String ICICLE_TAG = "simple-tetris";
 
 	private static final String PREFS_HIGH_LINES = "high_lines";
@@ -22,13 +30,10 @@ public class MainActivity extends Activity {
 	private TextView scoresView = null;
 	private TextView highScoresView = null;
 	private ScoresCounter scoresCounter = null;
+	private ScoresCounter highScoresCounter = null;
 	private Model model = new Model();
 
 	private TextView messageView = null;
-
-	// TODO: use some object here (2013/07/16)
-	private int highLines = 0;
-	private int highScores = 0;
 
 	private final View.OnTouchListener onTouchListener = new View.OnTouchListener() {
 		@Override
@@ -75,7 +80,11 @@ public class MainActivity extends Activity {
 		scoresCounter = new ScoresCounter(scoresView,
 				getString(R.string.scores_format));
 		model.setCounter(scoresCounter);
+
 		highScoresView = TextView.class.cast(findViewById(R.id.high_scores));
+		highScoresCounter = new ScoresCounter(highScoresView,
+				getString(R.string.high_scores_format));
+		model.setHighCounter(highScoresCounter);
 
 		loadHighScoresAndLines();
 
@@ -88,9 +97,9 @@ public class MainActivity extends Activity {
 			messageView.setText(getApplicationContext().getString(
 					R.string.mode_ready));
 		}
-		
+
 		// Assign font:
-		Typeface tf = Typeface.createFromAsset(getAssets(), "Callie-Mae.ttf");
+		Typeface tf = Typeface.createFromAsset(getAssets(), FONT_NAME);
 		scoresView.setTypeface(tf);
 		highScoresView.setTypeface(tf);
 		messageView.setTypeface(tf);
@@ -120,7 +129,7 @@ public class MainActivity extends Activity {
 	}
 
 	public final void startNewGame() {
-		if (!model.isGameActive()) {
+		if (!model.isGameActive()) {			
 			messageView.setVisibility(View.INVISIBLE);
 			scoresCounter.reset();
 			model.gameStart();
@@ -133,28 +142,48 @@ public class MainActivity extends Activity {
 		storeHighScoresAndLines();
 		messageView
 				.setText(getApplicationContext().getText(R.string.mode_over));
+		
+		animateBanner( 2 * ANIMATION_DURATION );
 	}
 
 	public void pauseGame() {
 		model.setGamePaused();
+		storeHighScoresAndLines();		
+		
 		messageView.setVisibility(View.VISIBLE);
 		messageView.setText(getApplicationContext()
 				.getText(R.string.mode_pause));
-		storeHighScoresAndLines();
+		
+		animateBanner( ANIMATION_DURATION );
 	}
-	
+
+	private void animateBanner( long duration ) {
+		ObjectAnimator alphaAnimation = ObjectAnimator.ofFloat(messageView,
+				"alpha", 0.4f, 1f);
+		alphaAnimation.setDuration(duration);
+		
+		ObjectAnimator moveAnimation = ObjectAnimator.ofFloat(messageView,
+				"translationY", -1000f, 0f);
+		moveAnimation.setDuration(duration);
+				
+		AnimatorSet animatorSet = new AnimatorSet();
+		animatorSet.play(moveAnimation).with(alphaAnimation);
+		animatorSet.start();
+	}
+
 	public void activateGame() {
 		messageView.setVisibility(View.INVISIBLE);
-		model.setGameActive();	
+		model.setGameActive();
 	}
-	
+
 	@Override
 	public void onBackPressed() {
-		if( model.isGameOver() || model.isGameBeforeStart() || model.isGamePaused() ) {
+		if (model.isGameOver() || model.isGameBeforeStart()
+				|| model.isGamePaused()) {
 			finish();
 			return;
 		}
-		if( model.isGameActive() ) {
+		if (model.isGameActive()) {
 			pauseGame();
 			return;
 		}
@@ -189,28 +218,27 @@ public class MainActivity extends Activity {
 
 	private void loadHighScoresAndLines() {
 		SharedPreferences prefs = getPreferences(MODE_PRIVATE);
-		highLines = prefs.getInt(PREFS_HIGH_LINES, 0);
-		highScores = prefs.getInt(PREFS_HIGH_SCORES, 0);
+		highScoresCounter.setLines(prefs.getInt(PREFS_HIGH_LINES, 0));
+		highScoresCounter.setScores(prefs.getInt(PREFS_HIGH_SCORES, 0));
 		updateHighScoresView();
 	}
 
 	private void updateHighScoresView() {
-		highScoresView.setText(String.format(
-				getString(R.string.high_scores_format), highLines, highScores));
+		highScoresCounter.updateView();
 	}
 
 	private void storeHighScoresAndLines() {
-		if (highScores < scoresCounter.getScores()) {
-			highScores = scoresCounter.getScores();
+		if (highScoresCounter.getScores() < scoresCounter.getScores()) {
+			highScoresCounter.setScores(scoresCounter.getScores());
 		}
-		if (highLines < scoresCounter.getLines()) {
-			highLines = scoresCounter.getLines();
+		if (highScoresCounter.getLines() < scoresCounter.getLines()) {
+			highScoresCounter.setLines(scoresCounter.getLines());
 		}
 
 		SharedPreferences prefs = getPreferences(MODE_PRIVATE);
 		SharedPreferences.Editor editor = prefs.edit();
-		editor.putInt(PREFS_HIGH_LINES, highLines);
-		editor.putInt(PREFS_HIGH_SCORES, highScores);
+		editor.putInt(PREFS_HIGH_LINES, highScoresCounter.getLines());
+		editor.putInt(PREFS_HIGH_SCORES, highScoresCounter.getScores());
 
 		editor.commit();
 		updateHighScoresView();

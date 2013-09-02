@@ -1,8 +1,5 @@
 package org.example.simpletetris;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.example.simpletetris.game.Block;
 import org.example.simpletetris.game.Model;
 
@@ -16,7 +13,6 @@ import android.graphics.RectF;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 public class TetrisView extends View {
@@ -84,15 +80,16 @@ public class TetrisView extends View {
 		byte nStatus = model.getCellStatus(row, col);
 
 		if (Block.CELL_EMPTY != nStatus) {
-			int color = Block.CELL_DYNAMIC == nStatus ? model
-					.getActiveBlockColor() : Block
-					.getColorForStaticValue(nStatus);
-			drawCell(canvas, col, row, color);
+			int resourceId = Block.CELL_DYNAMIC == nStatus ? model
+					.getActiveBlockResourceId() : Block
+					.getResourceIdForStaticValue(nStatus);
+			drawCell(canvas, col, row, resourceId);
 		}
 	}
 
-	private void drawCell(Canvas canvas, int x, int y, int colorFG) {
-		paint.setColor(colorFG);
+	private void drawCell(Canvas canvas, int x, int y, int resourceId) {
+		
+		// paint.setColor( resourceId );
 		float top = frameOffset.getHeight() + y * cellSize.getHeight()
 				+ BLOCK_OFFSET;
 		float left = frameOffset.getWidth() + x * cellSize.getWidth()
@@ -103,7 +100,8 @@ public class TetrisView extends View {
 				- BLOCK_OFFSET;
 		RectF rect = new RectF(left, top, right, bottom);
 
-		canvas.drawRoundRect(rect, 4, 4, paint);
+		Bitmap b = BitmapFactory.decodeResource( getResources(), resourceId);		
+		canvas.drawBitmap(b, null, rect, paint );
 	}
 
 	@Override
@@ -123,13 +121,6 @@ public class TetrisView extends View {
 	}
 
 	private void drawFrame(Canvas canvas) {
-		try {
-			InputStream input = activity.getAssets().open("frame.png");
-			Bitmap bitmap = BitmapFactory.decodeStream(input);
-			canvas.drawBitmap(bitmap, 0, 0, paint);
-		} catch (IOException ex) {
-			Log.e("asset", "can't open asset bitmap", ex);
-		}
 		paint.setColor(Color.LTGRAY);
 		canvas.drawRect(frameOffset.getWidth(), frameOffset.getHeight(), width
 				- frameOffset.getWidth(), height - frameOffset.getHeight(),
