@@ -1,19 +1,24 @@
-
 package org.example.simpletetris.game;
-
 
 import android.os.Bundle;
 
 public class Model {
 
 	public enum GameStatus {
-		BEFORE_START {}, ACTIVE {}, PAUSED {}, OVER {};
+		BEFORE_START {
+		},
+		ACTIVE {
+		},
+		PAUSED {
+		},
+		OVER {
+		};
 	}
-	
+
 	public enum Move {
 		LEFT, RIGHT, ROTATE, DOWN
 	}
-	
+
 	private static final String TAG_DATA = "data";
 	private static final String TAG_ACTIVE_BLOCK = "active-block";
 
@@ -21,25 +26,28 @@ public class Model {
 	public static final int NUM_COLS = 10; // number of columns in field
 	public static final int NUM_ROWS = 20; // number of rows in field
 
-	// game status constants:
 	private GameStatus gameStatus = GameStatus.BEFORE_START;
 
 	// array of cell values:
 	private byte[][] field = null;
 
-	// active block:
 	private Block activeBlock = null;
 
-	// scores counter:
 	private ScoresCounter counter = null;
+	private ScoresCounter highCounter = null;
+	
 
 	public Model() {
 		field = new byte[NUM_ROWS][NUM_COLS];
 	}
-	
+
 	public void setCounter(ScoresCounter counter) {
 		this.counter = counter;
 	}
+	
+	public void setHighCounter(ScoresCounter counter) {
+		this.highCounter = counter;
+	}	
 
 	public boolean isGameActive() {
 		return GameStatus.ACTIVE.equals(gameStatus);
@@ -48,10 +56,10 @@ public class Model {
 	public boolean isGameOver() {
 		return GameStatus.OVER.equals(gameStatus);
 	}
-	
+
 	public boolean isGameBeforeStart() {
 		return GameStatus.BEFORE_START.equals(gameStatus);
-	}	
+	}
 
 	public void reset() {
 		reset(false); // call the inner method - reset the all data
@@ -75,31 +83,38 @@ public class Model {
 			return;
 		}
 		setGameActive();
+		reset( false );
 		activeBlock = Block.createBlock();
-		
+
 	}
 
 	public void setGameActive() {
 		setGameStatus(GameStatus.ACTIVE);
 	}
-	
+
 	public void setGamePaused() {
 		setGameStatus(GameStatus.PAUSED);
 	}
 
 	public boolean isGamePaused() {
 		return GameStatus.PAUSED.equals(gameStatus);
-	}	
-	
-	public synchronized void genereteNewField(Move move) {	
-		
-		if (!isGameActive()) {
+	}
+
+	public synchronized void genereteNewField(Move move) {
+
+		if (!isGameActive() || null==activeBlock ) {
 			return;
 		}
 
 		// get the parameters of block:
-		Point newTopLeft = new Point(activeBlock.getTopLeft());
-		int nFrame = activeBlock.getFrame();
+		Point newTopLeft = null;
+		int nFrame = 0;
+		if( null==activeBlock ) {
+			newTopLeft = new Point(0,0);
+		} else {
+			newTopLeft = new Point( activeBlock.getTopLeft());
+			nFrame = activeBlock.getFrame();
+		}
 
 		// Clear the old values:
 		reset(true);
@@ -134,9 +149,9 @@ public class Model {
 				if (!newBlock()) {
 					// Game is over
 					setGameStatus(GameStatus.OVER);
-					
+
 					activeBlock = null;
-					reset(false);
+//					reset(false);
 				}
 			}
 
@@ -186,7 +201,8 @@ public class Model {
 				for (int j = 0; j < shape[i].length; j++) {
 					int y = newTopLeft.getY() + i;
 					int x = newTopLeft.getX() + j;
-					if( Block.CELL_EMPTY!=shape[i][j] && Block.CELL_EMPTY!=field[y][x]) {
+					if (Block.CELL_EMPTY != shape[i][j]
+							&& Block.CELL_EMPTY != field[y][x]) {
 						return false;
 					}
 				}
@@ -197,7 +213,7 @@ public class Model {
 				for (int j = 0; j < shape[i].length; j++) {
 					int y = newTopLeft.getY() + i;
 					int x = newTopLeft.getX() + j;
-					if( Block.CELL_EMPTY!=shape[i][j]) {
+					if (Block.CELL_EMPTY != shape[i][j]) {
 						field[y][x] = shape[i][j];
 					}
 				}
@@ -264,8 +280,8 @@ public class Model {
 		}
 	}
 
-	public int getActiveBlockColor() {
-		return activeBlock.getColor();
+	public int getActiveBlockResourceId() {
+		return activeBlock.getResourceId();
 	}
 
 	public void storeTo(Bundle bundle) {
@@ -274,15 +290,16 @@ public class Model {
 	}
 
 	public void restoreFrom(Bundle bundle) {
-		activeBlock = Block.class.cast( bundle.getSerializable(TAG_ACTIVE_BLOCK));
-		restoreDataFromIntArray( bundle.getIntArray(TAG_DATA));
+		activeBlock = Block.class
+				.cast(bundle.getSerializable(TAG_ACTIVE_BLOCK));
+		restoreDataFromIntArray(bundle.getIntArray(TAG_DATA));
 	}
-	
+
 	private void restoreDataFromIntArray(int[] src) {
-		if( null==src ) {
+		if (null == src) {
 			return;
 		}
-		for( int k=0; k<src.length; k++ ) {
+		for (int k = 0; k < src.length; k++) {
 			int i = k / NUM_COLS;
 			int j = k % NUM_COLS;
 			field[i][j] = (byte) src[k];
@@ -290,13 +307,13 @@ public class Model {
 	}
 
 	private int[] getIntArrayFromData() {
-		int[] result = new int[ NUM_COLS * NUM_ROWS ];
-		for( int i=0; i<NUM_ROWS; i++ ) {
-			for( int j=0; j<NUM_COLS; j++ ) {
-				result[ NUM_COLS * i + j ] = field[i][j];
+		int[] result = new int[NUM_COLS * NUM_ROWS];
+		for (int i = 0; i < NUM_ROWS; i++) {
+			for (int j = 0; j < NUM_COLS; j++) {
+				result[NUM_COLS * i + j] = field[i][j];
 			}
 		}
 		return result;
 	}
-	
+
 }
