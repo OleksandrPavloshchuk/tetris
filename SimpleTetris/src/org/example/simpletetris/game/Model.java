@@ -1,11 +1,13 @@
 package org.example.simpletetris.game;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import android.os.Bundle;
 
-public class Model {
+public class Model implements Serializable {
+	private static final long serialVersionUID = -166355688822702218L;
 
 	public enum GameStatus {
 		BEFORE_START {
@@ -198,7 +200,7 @@ public class Model {
 
 	private final boolean isMoveValid(Point newTopLeft, int nFrame) {
 		synchronized (field) {
-			byte[][] shape = activeBlock.getShape(nFrame);
+			int[][] shape = activeBlock.getShape(nFrame);
 
 			if (newTopLeft.getY() < 0) {
 				return false;

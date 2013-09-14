@@ -7,22 +7,18 @@ import java.util.Random;
 
 import org.example.simpletetris.R;
 
-
 public class Block implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public enum BlockColor {
-		RED( R.drawable.red_block, (byte) 2),
-		GREEN( R.drawable.green_block, (byte) 3),
-		BLUE( R.drawable.blue_block, (byte) 4),
-		YELLOW( R.drawable.yellow_block, (byte) 5),
-		CYAN(	R.drawable.cyan_block, (byte) 6),
-		VIOLET( R.drawable.violet_block, (byte) 7 );
+		RED(R.drawable.red_block, 2), GREEN(R.drawable.green_block, 3), BLUE(
+				R.drawable.blue_block, 4), YELLOW(R.drawable.yellow_block, 5), CYAN(
+				R.drawable.cyan_block, 6), VIOLET(R.drawable.violet_block, 7);
 
-		private final byte value;
+		private final int value;
 		private final int resourceId;
 
-		private BlockColor(int resourceId, byte value) {
+		private BlockColor(int resourceId, int value) {
 			this.resourceId = resourceId;
 			this.value = value;
 		}
@@ -37,7 +33,7 @@ public class Block implements Serializable {
 	// current block state:
 	private int shape = 0;
 	private int frame = 0;
-	private Point topLeft = new Point( Model.NUM_COLS / 2, 0);
+	private Point topLeft = new Point(Model.NUM_COLS / 2, 0);
 	private BlockColor color;
 
 	public int getFrame() {
@@ -48,7 +44,7 @@ public class Block implements Serializable {
 		return color.resourceId;
 	}
 
-	public byte getStaticValue() {
+	public int getStaticValue() {
 		return color.value;
 	}
 
@@ -70,7 +66,7 @@ public class Block implements Serializable {
 		return Shape.values()[shape].frameCount;
 	}
 
-	public final byte[][] getShape(int nFrame) {
+	public final int[][] getShape(int nFrame) {
 		return Shape.values()[shape].getFrame(nFrame).get();
 	}
 
@@ -85,10 +81,11 @@ public class Block implements Serializable {
 				.values().length)];
 		Block result = new Block(indexShape, blockColor);
 		// Set to the middle
-		result.topLeft.setX( result.topLeft.getX() - Shape.values()[indexShape].getStartMiddleX());
-		
+		result.topLeft.setX(result.topLeft.getX()
+				- Shape.values()[indexShape].getStartMiddleX());
+
 		return result;
-		
+
 	}
 
 	private Block(int nShape, BlockColor blockColor) {
@@ -201,7 +198,7 @@ public class Block implements Serializable {
 			this.frameCount = frameCount;
 			this.startMiddleX = startMiddleX;
 		}
-		
+
 		private int getStartMiddleX() {
 			return startMiddleX;
 		}
@@ -216,10 +213,10 @@ public class Block implements Serializable {
 			this.width = width;
 		}
 
-		private final List<byte[]> data = new ArrayList<byte[]>(4);
+		private final List<int[]> data = new ArrayList<int[]>(4);
 
 		private Frame add(String rowStr) {
-			byte[] row = new byte[rowStr.length()];
+			int[] row = new int[rowStr.length()];
 			for (int i = 0; i < rowStr.length(); i++) {
 				row[i] = Byte.valueOf("" + rowStr.charAt(i));
 			}
@@ -227,8 +224,8 @@ public class Block implements Serializable {
 			return this;
 		}
 
-		private byte[][] get() {
-			byte[][] result = new byte[data.size()][];
+		private int[][] get() {
+			int[][] result = new int[data.size()][];
 			return data.toArray(result);
 		}
 	}
