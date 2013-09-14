@@ -1,5 +1,8 @@
 package org.example.simpletetris.game;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.os.Bundle;
 
 public class Model {
@@ -29,25 +32,38 @@ public class Model {
 	private GameStatus gameStatus = GameStatus.BEFORE_START;
 
 	// array of cell values:
-	private byte[][] field = null;
+	private final List<List<Integer>> field;
 
 	private Block activeBlock = null;
 
 	private ScoresCounter counter = null;
 	private ScoresCounter highCounter = null;
-	
 
 	public Model() {
-		field = new byte[NUM_ROWS][NUM_COLS];
+		field = createEmptyField();
+	}
+
+	private static final List<List<Integer>> createEmptyField() {
+		final List<List<Integer>> result = new ArrayList<List<Integer>>(
+				NUM_ROWS);
+		for (int i = 0; i < NUM_ROWS; i++) {
+			final List<Integer> row = new ArrayList<Integer>(NUM_COLS);
+			for (int j = 0; j < NUM_COLS; j++) {
+				row.add(Block.CELL_EMPTY);
+			}
+			result.add(row);
+		}
+
+		return result;
 	}
 
 	public void setCounter(ScoresCounter counter) {
 		this.counter = counter;
 	}
-	
+
 	public void setHighCounter(ScoresCounter counter) {
 		this.highCounter = counter;
-	}	
+	}
 
 	public boolean isGameActive() {
 		return GameStatus.ACTIVE.equals(gameStatus);
@@ -65,12 +81,12 @@ public class Model {
 		reset(false); // call the inner method - reset the all data
 	}
 
-	public byte getCellStatus(int nRow, int nCol) {
-		return field[nRow][nCol];
+	public final int getCellStatus(final int row, final int col) {
+		return field.get(row).get(col);
 	}
 
-	public void setCellStatus(int nRow, int nCol, byte nStatus) {
-		field[nRow][nCol] = nStatus;
+	public void setCellStatus(final int row, final int col, final int status) {
+		field.get(row).set(col, status);
 	}
 
 	public synchronized void setGameStatus(GameStatus gameStatus) {
@@ -83,7 +99,7 @@ public class Model {
 			return;
 		}
 		setGameActive();
-		reset( false );
+		reset(false);
 		activeBlock = Block.createBlock();
 
 	}
@@ -102,17 +118,17 @@ public class Model {
 
 	public synchronized void genereteNewField(Move move) {
 
-		if (!isGameActive() || null==activeBlock ) {
+		if (!isGameActive() || null == activeBlock) {
 			return;
 		}
 
 		// get the parameters of block:
 		Point newTopLeft = null;
 		int nFrame = 0;
-		if( null==activeBlock ) {
-			newTopLeft = new Point(0,0);
+		if (null == activeBlock) {
+			newTopLeft = new Point(0, 0);
 		} else {
-			newTopLeft = new Point( activeBlock.getTopLeft());
+			newTopLeft = new Point(activeBlock.getTopLeft());
 			nFrame = activeBlock.getFrame();
 		}
 
@@ -151,7 +167,7 @@ public class Model {
 					setGameStatus(GameStatus.OVER);
 
 					activeBlock = null;
-//					reset(false);
+					// reset(false);
 				}
 			}
 
@@ -172,8 +188,9 @@ public class Model {
 	private final void reset(boolean bDynamicDataOnly) {
 		for (int i = 0; i < NUM_ROWS; i++) {
 			for (int j = 0; j < NUM_COLS; j++) {
-				if (!bDynamicDataOnly || field[i][j] == Block.CELL_DYNAMIC) {
-					field[i][j] = Block.CELL_EMPTY;
+				if (!bDynamicDataOnly
+						|| getCellStatus(i, j) == Block.CELL_DYNAMIC) {
+					setCellStatus(i, j, Block.CELL_EMPTY);
 				}
 			}
 		}
@@ -202,7 +219,7 @@ public class Model {
 					int y = newTopLeft.getY() + i;
 					int x = newTopLeft.getX() + j;
 					if (Block.CELL_EMPTY != shape[i][j]
-							&& Block.CELL_EMPTY != field[y][x]) {
+							&& Block.CELL_EMPTY != getCellStatus(y, x)) {
 						return false;
 					}
 				}
@@ -214,7 +231,7 @@ public class Model {
 					int y = newTopLeft.getY() + i;
 					int x = newTopLeft.getX() + j;
 					if (Block.CELL_EMPTY != shape[i][j]) {
-						field[y][x] = shape[i][j];
+						setCellStatus(y, x, shape[i][j]);
 					}
 				}
 			}
@@ -231,9 +248,9 @@ public class Model {
 	private synchronized boolean newBlock() {
 
 		// set all the dynamic data as static:
-		for (int i = 0; i < field.length; i++) {
-			for (int j = 0; j < field[i].length; j++) {
-				byte status = getCellStatus(i, j);
+		for (int i = 0; i < NUM_ROWS; i++) {
+			for (int j = 0; j < NUM_COLS; j++) {
+				int status = getCellStatus(i, j);
 				if (status == Block.CELL_DYNAMIC) {
 					status = activeBlock.getStaticValue();
 					setCellStatus(i, j, status);
@@ -241,10 +258,10 @@ public class Model {
 			}
 		}
 
-		for (int i = 0; i < field.length; i++) {
+		for (int i = 0; i < NUM_ROWS; i++) {
 			boolean bFullRow = true;
-			for (int j = 0; j < field[i].length; j++) {
-				byte status = getCellStatus(i, j);
+			for (int j = 0; j < NUM_COLS; j++) {
+				int status = getCellStatus(i, j);
 				boolean isEmpty = Block.CELL_EMPTY == status;
 				bFullRow &= !isEmpty;
 			}
@@ -270,12 +287,12 @@ public class Model {
 	private synchronized final void shiftRows(int nToRow) {
 		if (nToRow > 0) {
 			for (int j = nToRow - 1; j >= 0; j--) {
-				for (int m = 0; m < field[j].length; m++) {
+				for (int m = 0; m < NUM_COLS; m++) {
 					setCellStatus(j + 1, m, getCellStatus(j, m));
 				}
 			}
 		}
-		for (int j = 0; j < field[0].length; j++) {
+		for (int j = 0; j < NUM_COLS; j++) {
 			setCellStatus(0, j, Block.CELL_EMPTY);
 		}
 	}
@@ -302,7 +319,7 @@ public class Model {
 		for (int k = 0; k < src.length; k++) {
 			int i = k / NUM_COLS;
 			int j = k % NUM_COLS;
-			field[i][j] = (byte) src[k];
+			setCellStatus(i, j, src[k]);
 		}
 	}
 
@@ -310,7 +327,7 @@ public class Model {
 		int[] result = new int[NUM_COLS * NUM_ROWS];
 		for (int i = 0; i < NUM_ROWS; i++) {
 			for (int j = 0; j < NUM_COLS; j++) {
-				result[NUM_COLS * i + j] = field[i][j];
+				result[NUM_COLS * i + j] = getCellStatus(i, j);
 			}
 		}
 		return result;

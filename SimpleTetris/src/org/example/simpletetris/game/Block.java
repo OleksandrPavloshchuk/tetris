@@ -29,8 +29,8 @@ public class Block implements Serializable {
 	}
 
 	// cell status values (outer):
-	public static final byte CELL_EMPTY = 0;
-	public static final byte CELL_DYNAMIC = 1;
+	public static final int CELL_EMPTY = 0;
+	public static final int CELL_DYNAMIC = 1;
 
 	private static Random random = new Random();
 
@@ -52,9 +52,9 @@ public class Block implements Serializable {
 		return color.value;
 	}
 
-	public static int getResourceIdForStaticValue(byte b) {
+	public static int getResourceIdForStaticValue(int n) {
 		for (BlockColor item : BlockColor.values()) {
-			if (b == item.value) {
+			if (n == item.value) {
 				return item.resourceId;
 			}
 		}
