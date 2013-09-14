@@ -1,6 +1,10 @@
 package org.example.simpletetris;
 
-public class Dimension {
+import java.io.Serializable;
+
+public class Dimension implements Serializable {
+	private static final long serialVersionUID = 7387070051132481218L;
+	
 	private final int width;
 	private final int height;
 	

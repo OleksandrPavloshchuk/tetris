@@ -1,6 +1,10 @@
 package org.example.simpletetris.game;
 
-public class Point {
+import java.io.Serializable;
+
+public class Point implements Serializable {
+	private static final long serialVersionUID = 8719795709864859393L;
+	
 	private int x;
 	private int y;
 	
