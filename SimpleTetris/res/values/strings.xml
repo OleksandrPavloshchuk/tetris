@@ -7,5 +7,10 @@
     <string name="mode_over">Game Over\nTouch The Screen To Play Again\nPress \"Back\" for exit</string>
     <string name="high_scores_format"> Best Lines: %1$d Best Scores: %2$d</string>
     <string name="scores_format"> Lines: %1$d Scores: %2$d</string>
-
+    
+    <string name="hint_up">Rotate</string>
+    <string name="hint_down">Drop</string>
+    <string name="hint_left">Left</string>
+    <string name="hint_right">Right</string>
+    
 </resources>

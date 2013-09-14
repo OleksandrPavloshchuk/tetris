@@ -15,8 +15,6 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
-	// private static final String FONT_NAME = "Callie-Mae.ttf";
-	
 	private static final String FONT_NAME = "SpicyRice_Regular.ttf";
 
 	private static final int ANIMATION_DURATION = 400;

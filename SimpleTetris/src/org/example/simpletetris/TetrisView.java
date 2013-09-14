@@ -77,12 +77,12 @@ public class TetrisView extends View {
 
 	private void drawCell(Canvas canvas, int row, int col) {
 
-		byte nStatus = model.getCellStatus(row, col);
+		int status = model.getCellStatus(row, col);
 
-		if (Block.CELL_EMPTY != nStatus) {
-			int resourceId = Block.CELL_DYNAMIC == nStatus ? model
+		if (Block.CELL_EMPTY != status) {
+			int resourceId = Block.CELL_DYNAMIC == status ? model
 					.getActiveBlockResourceId() : Block
-					.getResourceIdForStaticValue(nStatus);
+					.getResourceIdForStaticValue(status);
 			drawCell(canvas, col, row, resourceId);
 		}
 	}

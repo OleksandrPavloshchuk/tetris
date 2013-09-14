@@ -1,13 +1,13 @@
-/**
- * ScoresCounter    counting the scores eraned in Tetris
- */
-
 package org.example.simpletetris.game;
+
+import java.io.Serializable;
 
 import android.os.Bundle;
 import android.widget.TextView;
 
-public class ScoresCounter {
+public class ScoresCounter implements Serializable {
+	private static final long serialVersionUID = -1761429120586168951L;
+	
 	private static final String TAG_SCORES = "scores";
 	private static final String TAG_LINES = "lines";
 	
