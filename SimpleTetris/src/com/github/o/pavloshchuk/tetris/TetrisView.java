@@ -1,7 +1,7 @@
-package org.example.simpletetris;
+package com.github.o.pavloshchuk.tetris;
 
-import org.example.simpletetris.game.Block;
-import org.example.simpletetris.game.Model;
+import com.github.o.pavloshchuk.tetris.game.Block;
+import com.github.o.pavloshchuk.tetris.game.Model;
 
 import android.content.Context;
 import android.graphics.Bitmap;

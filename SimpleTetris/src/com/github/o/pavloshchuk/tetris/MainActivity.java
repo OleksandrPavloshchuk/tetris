@@ -1,7 +1,9 @@
-package org.example.simpletetris;
+package com.github.o.pavloshchuk.tetris;
 
-import org.example.simpletetris.game.Model;
-import org.example.simpletetris.game.ScoresCounter;
+import org.example.simpletetris.R;
+
+import com.github.o.pavloshchuk.tetris.game.Model;
+import com.github.o.pavloshchuk.tetris.game.ScoresCounter;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
