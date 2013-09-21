@@ -123,6 +123,7 @@ public class MainActivity extends Activity {
 		if (model.isGameActive()) {
 			tetrisView.setGameCommand(move);
 			scoresView.invalidate();
+			highScoresView.invalidate();
 		}
 	}
 

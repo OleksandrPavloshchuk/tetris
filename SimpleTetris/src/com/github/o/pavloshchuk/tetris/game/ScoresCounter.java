@@ -7,18 +7,18 @@ import android.widget.TextView;
 
 public class ScoresCounter implements Serializable {
 	private static final long serialVersionUID = -1761429120586168951L;
-	
+
 	private static final String TAG_SCORES = "scores";
 	private static final String TAG_LINES = "lines";
-	
+
 	private int scores = 0;
 	private int lines = 0;
 	private int scoreDelta = 4;
-	
+
 	private final TextView status;
 	private final String format;
-	
-	public ScoresCounter( TextView status, String format ) {
+
+	public ScoresCounter(TextView status, String format) {
 		this.status = status;
 		this.format = format;
 	}
@@ -36,13 +36,15 @@ public class ScoresCounter implements Serializable {
 	public int getLines() {
 		return lines;
 	}
-	
-	public void setLines( int lines ) {
+
+	public void setLines(int lines) {
 		this.lines = lines;
+		updateView();
 	}
-	
-	public void setScores( int scores ) {
+
+	public void setScores(int scores) {
 		this.scores = scores;
+		updateView();
 	}
 
 	public void addScores() {
@@ -54,10 +56,11 @@ public class ScoresCounter implements Serializable {
 		lines++;
 		updateView();
 	}
-	
 
 	public void updateView() {
-		status.setText( String.format( format, lines, scores));
+		if (null != status) {
+			status.setText(String.format(format, lines, scores));
+		}
 	}
 
 	public void storeTo(Bundle bundle) {
@@ -68,5 +71,5 @@ public class ScoresCounter implements Serializable {
 	public void restoreFrom(Bundle bundle) {
 		this.lines = bundle.getInt(TAG_LINES);
 		this.scores = bundle.getInt(TAG_SCORES);
-	}	
+	}
 }

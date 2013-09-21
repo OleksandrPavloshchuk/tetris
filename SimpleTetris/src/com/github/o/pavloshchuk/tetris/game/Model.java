@@ -1,8 +1,7 @@
 package com.github.o.pavloshchuk.tetris.game;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import android.os.Bundle;
 
@@ -17,7 +16,7 @@ public class Model implements Serializable {
 		LEFT, RIGHT, ROTATE, DOWN
 	}
 
-	private static final String TAG_DATA = "data";
+	private static final String TAG_FIELD = "field";
 	private static final String TAG_ACTIVE_BLOCK = "active-block";
 
 	public static final int NUM_COLS = 10;
@@ -25,8 +24,7 @@ public class Model implements Serializable {
 
 	private GameStatus gameStatus = GameStatus.BEFORE_START;
 
-	// array of cell values:
-	private final List<List<Integer>> field;
+	private final int[] field = new int[NUM_ROWS * NUM_COLS];
 
 	private Block activeBlock = null;
 
@@ -34,21 +32,7 @@ public class Model implements Serializable {
 	private ScoresCounter highCounter = null;
 
 	public Model() {
-		field = createEmptyField();
-	}
-
-	private static final List<List<Integer>> createEmptyField() {
-		final List<List<Integer>> result = new ArrayList<List<Integer>>(
-				NUM_ROWS);
-		for (int i = 0; i < NUM_ROWS; i++) {
-			final List<Integer> row = new ArrayList<Integer>(NUM_COLS);
-			for (int j = 0; j < NUM_COLS; j++) {
-				row.add(Block.CELL_EMPTY);
-			}
-			result.add(row);
-		}
-
-		return result;
+		Arrays.fill(field, Block.CELL_EMPTY);
 	}
 
 	public void setCounter(ScoresCounter counter) {
@@ -72,11 +56,11 @@ public class Model implements Serializable {
 	}
 
 	public final int getCellStatus(final int row, final int col) {
-		return field.get(row).get(col);
+		return this.field[row * NUM_COLS + col];
 	}
 
 	public void setCellStatus(final int row, final int col, final int status) {
-		field.get(row).set(col, status);
+		this.field[row * NUM_COLS + col] = status;
 	}
 
 	public final boolean isCellDynamic(final int y, final int x) {
@@ -155,13 +139,11 @@ public class Model implements Serializable {
 		}
 		if (!isMoveValid(newTopLeft, nFrame)) {
 
-			// set old the block:
+			// check old block:
 			isMoveValid(activeBlock.getTopLeft(), activeBlock.getFrame());
 
 			if (Move.DOWN.equals(move)) {
-
-				// add the scores:
-				counter.addScores();
+				addScores();
 
 				if (!newBlock()) {
 					// Game is over
@@ -175,6 +157,14 @@ public class Model implements Serializable {
 		} else {
 			// Make the new move:
 			activeBlock.setState(nFrame, newTopLeft);
+		}
+	}
+
+	private void addScores() {
+		counter.addScores();
+		final int scores = counter.getScores();
+		if (highCounter.getScores() < scores) {
+			highCounter.setScores(scores);
 		}
 	}
 
@@ -253,33 +243,39 @@ public class Model implements Serializable {
 		for (int i = 0; i < NUM_ROWS; i++) {
 			boolean bFullRow = true;
 			for (int j = 0; j < NUM_COLS; j++) {
-				bFullRow &= ! isCellEmpty(i, j);
+				bFullRow &= !isCellEmpty(i, j);
 			}
 			if (bFullRow) {
 				shiftRows(i);
-
-				// add lines to counter:
-				counter.addLine();
+				addLine();
 			}
 		}
 
 		// Generate the new block:
 		activeBlock = Block.createBlock();
-		
-		// If we can't place the newly created block, than game is over:  
+
+		// If we can't place the newly created block, than game is over:
 		return isMoveValid(activeBlock.getTopLeft(), activeBlock.getFrame());
+	}
+
+	private void addLine() {
+		counter.addLine();
+		final int lines = counter.getLines();
+		if( highCounter.getLines() < lines ) {
+			highCounter.setLines(lines);
+		}
 	}
 
 	private void convertDynamicCellsToStatic() {
 		final int blockStatus = activeBlock.getStaticValue();
-		
-		iterateByCells( new CellProcessor() {
-			
+
+		iterateByCells(new CellProcessor() {
+
 			@Override
 			public boolean processCell(int y, int x) {
-				if( isCellDynamic(y, x) ) {
+				if (isCellDynamic(y, x)) {
 					setCellStatus(y, x, blockStatus);
-				}				
+				}
 				return true;
 			}
 		});
@@ -304,47 +300,27 @@ public class Model implements Serializable {
 
 	public void storeTo(Bundle bundle) {
 		bundle.putSerializable(TAG_ACTIVE_BLOCK, activeBlock);
-		bundle.putIntArray(TAG_DATA, getIntArrayFromData());
+		bundle.putIntArray(TAG_FIELD, field);
 	}
 
 	public void restoreFrom(Bundle bundle) {
 		activeBlock = Block.class
 				.cast(bundle.getSerializable(TAG_ACTIVE_BLOCK));
-		restoreDataFromIntArray(bundle.getIntArray(TAG_DATA));
-	}
-
-	private void restoreDataFromIntArray(int[] src) {
-		if (null == src) {
-			return;
+		int[] restoredField = bundle.getIntArray(TAG_FIELD);
+		if (null != restoredField) {
+			System.arraycopy(restoredField, 0, field, 0, NUM_COLS * NUM_ROWS);
 		}
-		for (int k = 0; k < src.length; k++) {
-			int i = k / NUM_COLS;
-			int j = k % NUM_COLS;
-			setCellStatus(i, j, src[k]);
-		}
-	}
-
-	private int[] getIntArrayFromData() {
-		int[] result = new int[NUM_COLS * NUM_ROWS];
-		for (int i = 0; i < NUM_ROWS; i++) {
-			for (int j = 0; j < NUM_COLS; j++) {
-				result[NUM_COLS * i + j] = getCellStatus(i, j);
-			}
-		}
-		return result;
 	}
 
 	private boolean iterateByCells(CellProcessor cellProcessor) {
-		synchronized (field) {
-			for (int y = 0; y < NUM_ROWS; y++) {
-				for (int x = 0; x < NUM_COLS; x++) {
-					if (!cellProcessor.processCell(y, x)) {
-						return false;
-					}
+		for (int y = 0; y < NUM_ROWS; y++) {
+			for (int x = 0; x < NUM_COLS; x++) {
+				if (!cellProcessor.processCell(y, x)) {
+					return false;
 				}
 			}
-			return false;
 		}
+		return false;
 	}
 
 	private interface CellProcessor {
