@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.example.simpletetris.R;
+import com.github.o.pavloshchuk.tetris.R;
 
 public class Block implements Serializable {
 	private static final long serialVersionUID = 1L;

@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">SimpleTetris</string>
-    <string name="mode_ready">Tetris\nTouch The Screen To Play\nPress \"Back\" for exit</string>
-    <string name="mode_pause">Paused\nTouch The Screen To Resume\nPress \"Back\" for exit</string>
-    <string name="mode_over">Game Over\nTouch The Screen To Play Again\nPress \"Back\" for exit</string>
+    <string name="app_name">Free Tetris</string>
+    <string name="mode_ready">Tetris\nTouch the screen to play\nPress \"Back\" for exit</string>
+    <string name="mode_pause">Paused\nTouch the screen to resume\nPress \"Back\" for exit</string>
+    <string name="mode_over">Game Over\nTouch the screen to play again\nPress \"Back\" for exit</string>
     <string name="high_scores_format"> Best Lines: %1$d Best Scores: %2$d</string>
-    <string name="scores_format"> Lines: %1$d Scores: %2$d</string>
-    
+    <string name="scores_format"> Lines: %1$d Scores: %2$d</string>    
     <string name="hint_up">Rotate</string>
     <string name="hint_down">Drop</string>
     <string name="hint_left">Left</string>

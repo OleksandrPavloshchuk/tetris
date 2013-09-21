@@ -1,7 +1,5 @@
 package com.github.o.pavloshchuk.tetris;
 
-import org.example.simpletetris.R;
-
 import com.github.o.pavloshchuk.tetris.game.Model;
 import com.github.o.pavloshchuk.tetris.game.ScoresCounter;
 
