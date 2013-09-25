@@ -56,12 +56,16 @@ public class Model implements Serializable {
 	}
 
 	public final int getCellStatus(final int row, final int col) {
-		return this.field[row * NUM_COLS + col];
+		return this.field[getFieldIndex(row, col)];
 	}
 
 	public void setCellStatus(final int row, final int col, final int status) {
-		this.field[row * NUM_COLS + col] = status;
+		this.field[getFieldIndex(row, col)] = status;
 	}
+	
+	private static final int getFieldIndex(final int row, final int col) {
+		return row * NUM_COLS + col;
+	}	
 
 	public final boolean isCellDynamic(final int y, final int x) {
 		return Block.CELL_DYNAMIC == getCellStatus(y, x);
@@ -168,9 +172,6 @@ public class Model implements Serializable {
 		}
 	}
 
-	// ================================================
-	// Helper functions:
-
 	private final void cleanField() {
 		iterateByCells(new CellProcessor() {
 			@Override
@@ -215,8 +216,7 @@ public class Model implements Serializable {
 				for (int j = 0; j < shape[i].length; j++) {
 					int y = newTopLeft.getY() + i;
 					int x = newTopLeft.getX() + j;
-					if (Block.CELL_EMPTY != shape[i][j]
-							&& Block.CELL_EMPTY != getCellStatus(y, x)) {
+					if (Block.CELL_EMPTY != shape[i][j] && !isCellEmpty(y, x)) {
 						return false;
 					}
 				}
@@ -241,11 +241,14 @@ public class Model implements Serializable {
 		convertDynamicCellsToStatic();
 
 		for (int i = 0; i < NUM_ROWS; i++) {
-			boolean bFullRow = true;
+			boolean isRowCompleted = true;
 			for (int j = 0; j < NUM_COLS; j++) {
-				bFullRow &= !isCellEmpty(i, j);
+				isRowCompleted &= !isCellEmpty(i, j);
+				if( !isRowCompleted ) {
+					break;
+				}
 			}
-			if (bFullRow) {
+			if (isRowCompleted) {
 				shiftRows(i);
 				addLine();
 			}
@@ -267,7 +270,7 @@ public class Model implements Serializable {
 	}
 
 	private void convertDynamicCellsToStatic() {
-		final int blockStatus = activeBlock.getStaticValue();
+		final int blockStatus = activeBlock.getColor();
 
 		iterateByCells(new CellProcessor() {
 

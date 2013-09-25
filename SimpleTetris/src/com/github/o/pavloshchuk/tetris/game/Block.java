@@ -24,11 +24,11 @@ public class Block implements Serializable {
 		}
 	}
 
-	// cell status values (outer):
+	// cell status values
 	public static final int CELL_EMPTY = 0;
 	public static final int CELL_DYNAMIC = 1;
 
-	private static Random random = new Random();
+	private static Random random = new Random( System.currentTimeMillis());
 
 	// current block state:
 	private int shape = 0;
@@ -44,7 +44,7 @@ public class Block implements Serializable {
 		return color.resourceId;
 	}
 
-	public int getStaticValue() {
+	public int getColor() {
 		return color.value;
 	}
 
@@ -63,7 +63,7 @@ public class Block implements Serializable {
 	}
 
 	public final int getFramesCount() {
-		return Shape.values()[shape].frameCount;
+		return Shape.values()[shape].frames.size();
 	}
 
 	public final int[][] getShape(int nFrame) {
@@ -98,122 +98,48 @@ public class Block implements Serializable {
 	}
 
 	private enum Shape {
-		S1(1, 1) {
-			@Override
-			public Frame getFrame(int n) {
-				return new Frame(2).add("11").add("11");
-			}
-
-		},
-		S2(2, 2) {
-
-			@Override
-			public Frame getFrame(int n) {
-				switch (n) {
-				case 0:
-					return new Frame(4).add("1111");
-				case 1:
-					return new Frame(1).add("1").add("1").add("1").add("1");
-				}
-				throw new IllegalArgumentException("Invalid frame number: " + n);
-			}
-		},
-		S3(4, 1) {
-			@Override
-			public Frame getFrame(int n) {
-				switch (n) {
-				case 0:
-					return new Frame(3).add("010").add("111");
-				case 1:
-					return new Frame(2).add("10").add("11").add("10");
-				case 2:
-					return new Frame(3).add("111").add("010");
-				case 3:
-					return new Frame(2).add("01").add("11").add("01");
-				}
-				throw new IllegalArgumentException("Invalid frame number: " + n);
-			}
-		},
-		S4(4, 1) {
-			@Override
-			public Frame getFrame(int n) {
-				switch (n) {
-				case 0:
-					return new Frame(3).add("100").add("111");
-				case 1:
-					return new Frame(2).add("11").add("10").add("10");
-				case 2:
-					return new Frame(3).add("111").add("001");
-				case 3:
-					return new Frame(2).add("01").add("01").add("11");
-				}
-				throw new IllegalArgumentException("Invalid frame number: " + n);
-			}
-		},
-		S5(4, 1) {
-			@Override
-			public Frame getFrame(int n) {
-				switch (n) {
-				case 0:
-					return new Frame(3).add("001").add("111");
-				case 1:
-					return new Frame(2).add("10").add("10").add("11");
-				case 2:
-					return new Frame(3).add("111").add("100");
-				case 3:
-					return new Frame(2).add("11").add("01").add("01");
-				}
-				throw new IllegalArgumentException("Invalid frame number: " + n);
-			}
-		},
-		S6(2, 1) {
-			@Override
-			public Frame getFrame(int n) {
-				switch (n) {
-				case 0:
-					return new Frame(3).add("110").add("011");
-				case 1:
-					return new Frame(2).add("01").add("11").add("10");
-				}
-				throw new IllegalArgumentException("Invalid frame number: " + n);
-			}
-		},
-		S7(2, 1) {
-			@Override
-			public Frame getFrame(int n) {
-				switch (n) {
-				case 0:
-					return new Frame(3).add("011").add("110");
-				case 1:
-					return new Frame(2).add("10").add("11").add("01");
-
-				}
-				throw new IllegalArgumentException("Invalid frame number: " + n);
-			}
-		};
-		private final int frameCount;
+		S1(1, "11.11"),
+		S2(2, "1111:1.1.1.1"),
+		S3(4, "010.111:10.11.10:111.010:01.11.01"),
+		S4(4, "100.111:11.10.10:111.001:01.01.11"),
+		S5(4, "001.111:10.10.11:111.100:11.01.01"),
+		S6(2, "110.011:01.11.10"),
+		S7(2, "011.110:10.11.01");
+		
+		private List<Frame> frames = new ArrayList<Frame>(4); 
 		private final int startMiddleX;
 
-		private Shape(int frameCount, int startMiddleX) {
-			this.frameCount = frameCount;
+		private Shape(int startMiddleX, String shapeStr ) {
 			this.startMiddleX = startMiddleX;
+			// Split the frames:
+			final String[] strs = shapeStr.split("[:]");
+			for( final String str : strs ) {
+				frames.add( new Frame( str ) );
+			}
 		}
 
 		private int getStartMiddleX() {
 			return startMiddleX;
 		}
 
-		public abstract Frame getFrame(int n);
+		public Frame getFrame(int n) {
+			return frames.get(n);
+		}
 	}
 
 	private static class Frame {
-		private final int width;
-
-		private Frame(int width) {
-			this.width = width;
-		}
-
+		private int width = 0;
 		private final List<int[]> data = new ArrayList<int[]>(4);
+
+		private Frame(String frameStr) {
+			final String[] strs = frameStr.split("[.]");
+			for( final String str : strs ) {
+				if( 0==width ) {
+					width = str.length();
+				}
+				add( str );
+			}
+		}
 
 		private Frame add(String rowStr) {
 			int[] row = new int[rowStr.length()];
