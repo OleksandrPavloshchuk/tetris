@@ -76,20 +76,17 @@ public class TetrisView extends View {
 	}
 
 	private void drawCell(Canvas canvas, int row, int col) {
-
-		int status = model.getCellStatus(row, col);
-
-		if (Block.CELL_EMPTY != status) {
-			int resourceId = Block.CELL_DYNAMIC == status ? model
-					.getActiveBlockResourceId() : Block
-					.getResourceIdForStaticValue(status);
-			drawCell(canvas, col, row, resourceId);
+		if( model.isCellEmpty(row, col) ) {
+			return;
 		}
+		final int resourceId = model.isCellDynamic(row, col) 
+			? model.getActiveBlockResourceId() 
+			: Block.getResourceIdForStaticValue( model.getCellStatus(row, col));
+		drawCell(canvas, col, row, resourceId);
 	}
 
 	private void drawCell(Canvas canvas, int x, int y, int resourceId) {
 		
-		// paint.setColor( resourceId );
 		float top = frameOffset.getHeight() + y * cellSize.getHeight()
 				+ BLOCK_OFFSET;
 		float left = frameOffset.getWidth() + x * cellSize.getWidth()
@@ -105,13 +102,13 @@ public class TetrisView extends View {
 	}
 
 	@Override
-	protected void onDraw(Canvas canvas) {
+	protected void onDraw(final Canvas canvas) {
 		super.onDraw(canvas);
 		drawFrame(canvas);
 		if (null == model) {
 			return;
 		}
-
+		
 		// draw all the cells:
 		for (int i = 0; i < Model.NUM_ROWS; i++) {
 			for (int j = 0; j < Model.NUM_COLS; j++) {

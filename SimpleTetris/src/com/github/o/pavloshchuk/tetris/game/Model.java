@@ -154,7 +154,6 @@ public class Model implements Serializable {
 					setGameStatus(GameStatus.OVER);
 
 					activeBlock = null;
-					// reset(false);
 				}
 			}
 
