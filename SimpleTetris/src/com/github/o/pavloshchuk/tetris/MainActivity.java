@@ -1,7 +1,7 @@
-package org.example.simpletetris;
+package com.github.o.pavloshchuk.tetris;
 
-import org.example.simpletetris.game.Model;
-import org.example.simpletetris.game.ScoresCounter;
+import com.github.o.pavloshchuk.tetris.game.Model;
+import com.github.o.pavloshchuk.tetris.game.ScoresCounter;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -42,16 +42,16 @@ public class MainActivity extends Activity {
 			} else if (model.isGameActive()) {
 				int direction = getDirection(v, event);
 				switch (direction) {
-				case 0: // left
+				case 0:
 					doMove(Model.Move.LEFT);
 					break;
-				case 1: // rotate
+				case 1:
 					doMove(Model.Move.ROTATE);
 					break;
-				case 2: // down
+				case 2:
 					doMove(Model.Move.DOWN);
 					break;
-				case 3: // right
+				case 3:
 					doMove(Model.Move.RIGHT);
 					break;
 				}
@@ -123,16 +123,18 @@ public class MainActivity extends Activity {
 		if (model.isGameActive()) {
 			tetrisView.setGameCommand(move);
 			scoresView.invalidate();
+			highScoresView.invalidate();
 		}
 	}
 
 	public final void startNewGame() {
-		if (!model.isGameActive()) {			
-			messageView.setVisibility(View.INVISIBLE);
-			scoresCounter.reset();
-			model.gameStart();
-			tetrisView.setGameCommandWithDelay(Model.Move.DOWN);
+		if (model.isGameActive()) {
+			return;
 		}
+		messageView.setVisibility(View.INVISIBLE);
+		scoresCounter.reset();
+		model.gameStart();
+		tetrisView.setGameCommandWithDelay(Model.Move.DOWN);
 	}
 
 	public void endGame() {
@@ -140,30 +142,30 @@ public class MainActivity extends Activity {
 		storeHighScoresAndLines();
 		messageView
 				.setText(getApplicationContext().getText(R.string.mode_over));
-		
-		animateBanner( 2 * ANIMATION_DURATION );
+
+		animateBanner(2 * ANIMATION_DURATION);
 	}
 
 	public void pauseGame() {
 		model.setGamePaused();
-		storeHighScoresAndLines();		
-		
+		storeHighScoresAndLines();
+
 		messageView.setVisibility(View.VISIBLE);
 		messageView.setText(getApplicationContext()
 				.getText(R.string.mode_pause));
-		
-		animateBanner( ANIMATION_DURATION );
+
+		animateBanner(ANIMATION_DURATION);
 	}
 
-	private void animateBanner( long duration ) {
+	private void animateBanner(long duration) {
 		ObjectAnimator alphaAnimation = ObjectAnimator.ofFloat(messageView,
 				"alpha", 0.4f, 1f);
 		alphaAnimation.setDuration(duration);
-		
+
 		ObjectAnimator moveAnimation = ObjectAnimator.ofFloat(messageView,
 				"translationY", -1000f, 0f);
 		moveAnimation.setDuration(duration);
-				
+
 		AnimatorSet animatorSet = new AnimatorSet();
 		animatorSet.play(moveAnimation).with(alphaAnimation);
 		animatorSet.start();

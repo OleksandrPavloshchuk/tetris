@@ -1,8 +1,7 @@
-package org.example.simpletetris.game;
+package com.github.o.pavloshchuk.tetris.game;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import android.os.Bundle;
 
@@ -10,31 +9,22 @@ public class Model implements Serializable {
 	private static final long serialVersionUID = -166355688822702218L;
 
 	public enum GameStatus {
-		BEFORE_START {
-		},
-		ACTIVE {
-		},
-		PAUSED {
-		},
-		OVER {
-		};
+		BEFORE_START, ACTIVE, PAUSED, OVER
 	}
 
 	public enum Move {
 		LEFT, RIGHT, ROTATE, DOWN
 	}
 
-	private static final String TAG_DATA = "data";
+	private static final String TAG_FIELD = "field";
 	private static final String TAG_ACTIVE_BLOCK = "active-block";
 
-	// some constants in the model:
-	public static final int NUM_COLS = 10; // number of columns in field
-	public static final int NUM_ROWS = 20; // number of rows in field
+	public static final int NUM_COLS = 10;
+	public static final int NUM_ROWS = 20;
 
 	private GameStatus gameStatus = GameStatus.BEFORE_START;
 
-	// array of cell values:
-	private final List<List<Integer>> field;
+	private final int[] field = new int[NUM_ROWS * NUM_COLS];
 
 	private Block activeBlock = null;
 
@@ -42,21 +32,7 @@ public class Model implements Serializable {
 	private ScoresCounter highCounter = null;
 
 	public Model() {
-		field = createEmptyField();
-	}
-
-	private static final List<List<Integer>> createEmptyField() {
-		final List<List<Integer>> result = new ArrayList<List<Integer>>(
-				NUM_ROWS);
-		for (int i = 0; i < NUM_ROWS; i++) {
-			final List<Integer> row = new ArrayList<Integer>(NUM_COLS);
-			for (int j = 0; j < NUM_COLS; j++) {
-				row.add(Block.CELL_EMPTY);
-			}
-			result.add(row);
-		}
-
-		return result;
+		Arrays.fill(field, Block.CELL_EMPTY);
 	}
 
 	public void setCounter(ScoresCounter counter) {
@@ -79,29 +55,40 @@ public class Model implements Serializable {
 		return GameStatus.BEFORE_START.equals(gameStatus);
 	}
 
-	public void reset() {
-		reset(false); // call the inner method - reset the all data
-	}
-
 	public final int getCellStatus(final int row, final int col) {
-		return field.get(row).get(col);
+		return this.field[getFieldIndex(row, col)];
 	}
 
 	public void setCellStatus(final int row, final int col, final int status) {
-		field.get(row).set(col, status);
+		this.field[getFieldIndex(row, col)] = status;
+	}
+	
+	private static final int getFieldIndex(final int row, final int col) {
+		return row * NUM_COLS + col;
+	}	
+
+	public final boolean isCellDynamic(final int y, final int x) {
+		return Block.CELL_DYNAMIC == getCellStatus(y, x);
+	}
+
+	public final boolean isCellEmpty(final int y, final int x) {
+		return Block.CELL_EMPTY == getCellStatus(y, x);
+	}
+
+	public final void cleanCell(final int y, final int x) {
+		setCellStatus(y, x, Block.CELL_EMPTY);
 	}
 
 	public synchronized void setGameStatus(GameStatus gameStatus) {
 		this.gameStatus = gameStatus;
 	}
 
-	// Start the game:
 	public void gameStart() {
 		if (isGameActive()) {
 			return;
 		}
 		setGameActive();
-		reset(false);
+		cleanField();
 		activeBlock = Block.createBlock();
 
 	}
@@ -135,7 +122,7 @@ public class Model implements Serializable {
 		}
 
 		// Clear the old values:
-		reset(true);
+		cleanDynamicData();
 
 		// count new parameters:
 		switch (move) {
@@ -156,20 +143,17 @@ public class Model implements Serializable {
 		}
 		if (!isMoveValid(newTopLeft, nFrame)) {
 
-			// set old the block:
+			// check old block:
 			isMoveValid(activeBlock.getTopLeft(), activeBlock.getFrame());
 
 			if (Move.DOWN.equals(move)) {
-
-				// add the scores:
-				counter.addScores();
+				addScores();
 
 				if (!newBlock()) {
 					// Game is over
 					setGameStatus(GameStatus.OVER);
 
 					activeBlock = null;
-					// reset(false);
 				}
 			}
 
@@ -179,23 +163,34 @@ public class Model implements Serializable {
 		}
 	}
 
-	// ================================================
-	// Helper functions:
-
-	/**
-	 * Reset the field data:
-	 * 
-	 * @param true - clear only dynamic data, false - clear all the data
-	 */
-	private final void reset(boolean bDynamicDataOnly) {
-		for (int i = 0; i < NUM_ROWS; i++) {
-			for (int j = 0; j < NUM_COLS; j++) {
-				if (!bDynamicDataOnly
-						|| getCellStatus(i, j) == Block.CELL_DYNAMIC) {
-					setCellStatus(i, j, Block.CELL_EMPTY);
-				}
-			}
+	private void addScores() {
+		counter.addScores();
+		final int scores = counter.getScores();
+		if (highCounter.getScores() < scores) {
+			highCounter.setScores(scores);
 		}
+	}
+
+	private final void cleanField() {
+		iterateByCells(new CellProcessor() {
+			@Override
+			public boolean processCell(int y, int x) {
+				cleanCell(y, x);
+				return true;
+			}
+		});
+	}
+
+	public final void cleanDynamicData() {
+		iterateByCells(new CellProcessor() {
+			@Override
+			public boolean processCell(int y, int x) {
+				if (isCellDynamic(y, x)) {
+					cleanCell(y, x);
+				}
+				return true;
+			}
+		});
 	}
 
 	private final boolean isMoveValid(Point newTopLeft, int nFrame) {
@@ -220,8 +215,7 @@ public class Model implements Serializable {
 				for (int j = 0; j < shape[i].length; j++) {
 					int y = newTopLeft.getY() + i;
 					int x = newTopLeft.getX() + j;
-					if (Block.CELL_EMPTY != shape[i][j]
-							&& Block.CELL_EMPTY != getCellStatus(y, x)) {
+					if (Block.CELL_EMPTY != shape[i][j] && !isCellEmpty(y, x)) {
 						return false;
 					}
 				}
@@ -241,49 +235,52 @@ public class Model implements Serializable {
 		}
 	}
 
-	/**
-	 * Create the new block:
-	 * 
-	 * @return true - block can be generated,
-	 * @return false - can't generate the block - GAME OVER!
-	 */
 	private synchronized boolean newBlock() {
 
-		// set all the dynamic data as static:
+		convertDynamicCellsToStatic();
+
 		for (int i = 0; i < NUM_ROWS; i++) {
+			boolean isRowCompleted = true;
 			for (int j = 0; j < NUM_COLS; j++) {
-				int status = getCellStatus(i, j);
-				if (status == Block.CELL_DYNAMIC) {
-					status = activeBlock.getStaticValue();
-					setCellStatus(i, j, status);
+				isRowCompleted &= !isCellEmpty(i, j);
+				if( !isRowCompleted ) {
+					break;
 				}
 			}
-		}
-
-		for (int i = 0; i < NUM_ROWS; i++) {
-			boolean bFullRow = true;
-			for (int j = 0; j < NUM_COLS; j++) {
-				int status = getCellStatus(i, j);
-				boolean isEmpty = Block.CELL_EMPTY == status;
-				bFullRow &= !isEmpty;
-			}
-			if (bFullRow) {
+			if (isRowCompleted) {
 				shiftRows(i);
-
-				// add lines to counter:
-				counter.addLine();
+				addLine();
 			}
 		}
 
 		// Generate the new block:
 		activeBlock = Block.createBlock();
 
-		// Check the validity of new block:
-		if (!isMoveValid(activeBlock.getTopLeft(), activeBlock.getFrame())) {
-			// GAME IS OVER!
-			return false;
+		// If we can't place the newly created block, than game is over:
+		return isMoveValid(activeBlock.getTopLeft(), activeBlock.getFrame());
+	}
+
+	private void addLine() {
+		counter.addLine();
+		final int lines = counter.getLines();
+		if( highCounter.getLines() < lines ) {
+			highCounter.setLines(lines);
 		}
-		return true;
+	}
+
+	private void convertDynamicCellsToStatic() {
+		final int blockStatus = activeBlock.getColor();
+
+		iterateByCells(new CellProcessor() {
+
+			@Override
+			public boolean processCell(int y, int x) {
+				if (isCellDynamic(y, x)) {
+					setCellStatus(y, x, blockStatus);
+				}
+				return true;
+			}
+		});
 	}
 
 	private synchronized final void shiftRows(int nToRow) {
@@ -305,34 +302,31 @@ public class Model implements Serializable {
 
 	public void storeTo(Bundle bundle) {
 		bundle.putSerializable(TAG_ACTIVE_BLOCK, activeBlock);
-		bundle.putIntArray(TAG_DATA, getIntArrayFromData());
+		bundle.putIntArray(TAG_FIELD, field);
 	}
 
 	public void restoreFrom(Bundle bundle) {
 		activeBlock = Block.class
 				.cast(bundle.getSerializable(TAG_ACTIVE_BLOCK));
-		restoreDataFromIntArray(bundle.getIntArray(TAG_DATA));
-	}
-
-	private void restoreDataFromIntArray(int[] src) {
-		if (null == src) {
-			return;
-		}
-		for (int k = 0; k < src.length; k++) {
-			int i = k / NUM_COLS;
-			int j = k % NUM_COLS;
-			setCellStatus(i, j, src[k]);
+		int[] restoredField = bundle.getIntArray(TAG_FIELD);
+		if (null != restoredField) {
+			System.arraycopy(restoredField, 0, field, 0, NUM_COLS * NUM_ROWS);
 		}
 	}
 
-	private int[] getIntArrayFromData() {
-		int[] result = new int[NUM_COLS * NUM_ROWS];
-		for (int i = 0; i < NUM_ROWS; i++) {
-			for (int j = 0; j < NUM_COLS; j++) {
-				result[NUM_COLS * i + j] = getCellStatus(i, j);
+	private boolean iterateByCells(CellProcessor cellProcessor) {
+		for (int y = 0; y < NUM_ROWS; y++) {
+			for (int x = 0; x < NUM_COLS; x++) {
+				if (!cellProcessor.processCell(y, x)) {
+					return false;
+				}
 			}
 		}
-		return result;
+		return false;
+	}
+
+	private interface CellProcessor {
+		boolean processCell(final int y, final int x);
 	}
 
 }

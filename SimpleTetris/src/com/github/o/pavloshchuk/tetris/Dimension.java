@@ -1,4 +1,4 @@
-package org.example.simpletetris;
+package com.github.o.pavloshchuk.tetris;
 
 import java.io.Serializable;
 

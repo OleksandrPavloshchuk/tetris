@@ -19,7 +19,7 @@
             style="@style/Scores"              
             />
 
-        <org.example.simpletetris.TetrisView
+        <com.github.o.pavloshchuk.tetris.TetrisView
             android:id="@+id/tetris"
             android:layout_width="match_parent"
             android:layout_height="match_parent" 

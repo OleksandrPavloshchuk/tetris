@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.example.simpletetris"
+    package="com.github.o.pavloshchuk.tetris"
     android:versionCode="1"
     android:versionName="10" >
 
@@ -14,7 +14,7 @@
         android:label="@string/app_name"
         android:theme="@android:style/Theme.NoTitleBar" >
         <activity            
-            android:name="org.example.simpletetris.MainActivity"
+            android:name="com.github.o.pavloshchuk.tetris.MainActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" 
             >
