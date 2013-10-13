@@ -1,11 +1,12 @@
 package com.github.o.pavloshchuk.tetris.test;
 
-import com.github.o.pavloshchuk.tetris.MainActivity;
-
 import android.content.Intent;
 import android.test.ActivityUnitTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.widget.TextView;
+
+import com.github.o.pavloshchuk.tetris.MainActivity;
+import com.github.o.pavloshchuk.tetris.game.Model;
 
 public class MainActivityUnitTest extends ActivityUnitTestCase<MainActivity> {
 
@@ -32,7 +33,17 @@ public class MainActivityUnitTest extends ActivityUnitTestCase<MainActivity> {
 
 	@SmallTest
 	public void testBeforeStart() {
+		assertEquals(Model.GameStatus.BEFORE_START,
+				this.activity.getGameStatus());
 		assertMessageText("Tetris\nTouch the screen to play\nPress \"Back\" for exit");
+	}
+
+	@SmallTest
+	public void testBackAfterStart() {
+		this.activity.startNewGame();
+		this.activity.onBackPressed();
+		assertEquals(Model.GameStatus.PAUSED, this.activity.getGameStatus());
+		assertMessageText("Paused\nTouch the screen to resume\nPress \"Back\" for exit");
 	}
 
 	private void assertMessageText(String expected) {

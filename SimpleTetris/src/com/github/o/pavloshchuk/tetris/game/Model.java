@@ -3,6 +3,8 @@ package com.github.o.pavloshchuk.tetris.game;
 import java.io.Serializable;
 import java.util.Arrays;
 
+import com.github.o.pavloshchuk.tetris.game.Model.GameStatus;
+
 import android.os.Bundle;
 
 public class Model implements Serializable {
@@ -299,6 +301,10 @@ public class Model implements Serializable {
 	public int getActiveBlockResourceId() {
 		return activeBlock.getResourceId();
 	}
+	
+	public final GameStatus getGameStatus() {
+		return gameStatus;
+	}	
 
 	public void storeTo(Bundle bundle) {
 		bundle.putSerializable(TAG_ACTIVE_BLOCK, activeBlock);

@@ -188,6 +188,10 @@ public class MainActivity extends Activity {
 			return;
 		}
 	}
+	
+	public Model.GameStatus getGameStatus() {
+		return model.getGameStatus();
+	}
 
 	@Override
 	protected void onPause() {
