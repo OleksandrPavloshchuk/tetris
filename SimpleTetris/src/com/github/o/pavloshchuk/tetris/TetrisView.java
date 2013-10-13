@@ -166,5 +166,9 @@ public class TetrisView extends View {
 			this.removeMessages(0);
 			sendMessageDelayed(obtainMessage(0), delayMillis);
 		}
+	}
+
+	public void setDelay(int duration) {
+		this.redrawHandler.sleep(duration);
 	};
 }
