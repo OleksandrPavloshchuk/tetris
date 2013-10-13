@@ -3,7 +3,7 @@ package com.github.o.pavloshchuk.tetris.game;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import com.github.o.pavloshchuk.tetris.game.Model.GameStatus;
+import com.github.o.pavloshchuk.tetris.MainActivity;
 
 import android.os.Bundle;
 
@@ -32,8 +32,11 @@ public class Model implements Serializable {
 
 	private ScoresCounter counter = null;
 	private ScoresCounter highCounter = null;
+	
+	private final MainActivity activity;
 
-	public Model() {
+	public Model( MainActivity activity ) {
+		this.activity = activity;
 		Arrays.fill(field, Block.CELL_EMPTY);
 	}
 
@@ -64,10 +67,10 @@ public class Model implements Serializable {
 	public void setCellStatus(final int row, final int col, final int status) {
 		this.field[getFieldIndex(row, col)] = status;
 	}
-	
+
 	private static final int getFieldIndex(final int row, final int col) {
 		return row * NUM_COLS + col;
-	}	
+	}
 
 	public final boolean isCellDynamic(final int y, final int x) {
 		return Block.CELL_DYNAMIC == getCellStatus(y, x);
@@ -237,7 +240,7 @@ public class Model implements Serializable {
 		}
 	}
 
-	private synchronized boolean newBlock() {
+	private boolean newBlock() {
 
 		convertDynamicCellsToStatic();
 
@@ -245,7 +248,7 @@ public class Model implements Serializable {
 			boolean isRowCompleted = true;
 			for (int j = 0; j < NUM_COLS; j++) {
 				isRowCompleted &= !isCellEmpty(i, j);
-				if( !isRowCompleted ) {
+				if (!isRowCompleted) {
 					break;
 				}
 			}
@@ -265,7 +268,7 @@ public class Model implements Serializable {
 	private void addLine() {
 		counter.addLine();
 		final int lines = counter.getLines();
-		if( highCounter.getLines() < lines ) {
+		if (highCounter.getLines() < lines) {
 			highCounter.setLines(lines);
 		}
 	}
@@ -285,26 +288,43 @@ public class Model implements Serializable {
 		});
 	}
 
-	private synchronized final void shiftRows(int nToRow) {
+	private final void shiftRows(int nToRow) {
 		if (nToRow > 0) {
 			for (int j = nToRow - 1; j >= 0; j--) {
-				for (int m = 0; m < NUM_COLS; m++) {
-					setCellStatus(j + 1, m, getCellStatus(j, m));
+				synchronized( this ) {
+					setRowEmpty(j + 1);
+				}
+				activity.repaint();
+				activity.setDelay( 1000 );				
+				synchronized( this ) {
+					shiftRowDown(j);
 				}
 			}
 		}
+		synchronized( this ) {
+			setRowEmpty(0);
+		}
+	}
+
+	private void setRowEmpty(int m) {
 		for (int j = 0; j < NUM_COLS; j++) {
-			setCellStatus(0, j, Block.CELL_EMPTY);
+			setCellStatus(m, j, Block.CELL_EMPTY);
+		}
+	}
+
+	private void shiftRowDown(int j) {
+		for (int m = 0; m < NUM_COLS; m++) {
+			setCellStatus(j + 1, m, getCellStatus(j, m));
 		}
 	}
 
 	public int getActiveBlockResourceId() {
 		return activeBlock.getResourceId();
 	}
-	
+
 	public final GameStatus getGameStatus() {
 		return gameStatus;
-	}	
+	}
 
 	public void storeTo(Bundle bundle) {
 		bundle.putSerializable(TAG_ACTIVE_BLOCK, activeBlock);

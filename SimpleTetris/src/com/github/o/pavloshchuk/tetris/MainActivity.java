@@ -29,7 +29,7 @@ public class MainActivity extends Activity {
 	private TextView highScoresView = null;
 	private ScoresCounter scoresCounter = null;
 	private ScoresCounter highScoresCounter = null;
-	private Model model = new Model();
+	private Model model = new Model( this );
 
 	private TextView messageView = null;
 
@@ -117,6 +117,10 @@ public class MainActivity extends Activity {
 			direction = (x > 1 - y) ? 3 : 1;
 		}
 		return direction;
+	}
+	
+	public void repaint() {
+		tetrisView.postInvalidate();
 	}
 
 	public void doMove(Model.Move move) {
@@ -246,6 +250,10 @@ public class MainActivity extends Activity {
 
 		editor.commit();
 		updateHighScoresView();
+	}
+
+	public void setDelay(int duration) {
+		tetrisView.setDelay( duration );
 	}
 
 }
