@@ -7,15 +7,12 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.SharedPreferences;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
-
-	private static final String FONT_NAME = "SpicyRice_Regular.ttf";
 
 	private static final int ANIMATION_DURATION = 400;
 
@@ -95,13 +92,6 @@ public class MainActivity extends Activity {
 			messageView.setText(getApplicationContext().getString(
 					R.string.mode_ready));
 		}
-
-		// Assign font:
-		Typeface tf = Typeface.createFromAsset(getAssets(), FONT_NAME);
-		scoresView.setTypeface(tf);
-		highScoresView.setTypeface(tf);
-		messageView.setTypeface(tf);
-
 	}
 
 	private int getDirection(View v, MotionEvent event) {
